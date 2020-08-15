@@ -127,7 +127,7 @@ allprojects {
 ```
 
 ### AndroidX dataBinding：
-`（api或）implementation 'com.github.weimingjue:BaseAdapter:3.61'`
+`（api或）implementation 'com.github.weimingjue:BaseAdapter:4.0.1'`
 
 不需要layoutId的混淆要求：
 ```
