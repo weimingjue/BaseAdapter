@@ -48,15 +48,15 @@ public abstract class BaseAdapterLvsList<DB extends ViewDataBinding, BEAN> exten
         return mHelper.getItemCount();
     }
 
-    @Override
-    protected final void onBindViewHolder2(@NonNull BaseViewHolder holder, int position) {
-        mHelper.onBindViewHolder(holder, position);
-    }
-
     @NonNull
     @Override
     protected final BaseViewHolder onCreateViewHolder2(@NonNull ViewGroup parent, @ListAdapterHelper.AdapterListType int viewType) {
         return mHelper.onCreateViewHolder(parent, viewType);
+    }
+
+    @Override
+    protected final void onBindViewHolder2(@NonNull BaseViewHolder holder, int position) {
+        mHelper.onBindViewHolder(holder, position);
     }
 
     @ListAdapterHelper.AdapterListType
@@ -113,7 +113,7 @@ public abstract class BaseAdapterLvsList<DB extends ViewDataBinding, BEAN> exten
     @Nullable
     @Override
     public View getHeaderView() {
-        return mHelper.getHeaderView();
+        return mHelper.mHeaderView;
     }
 
     /**
@@ -127,6 +127,6 @@ public abstract class BaseAdapterLvsList<DB extends ViewDataBinding, BEAN> exten
     @Nullable
     @Override
     public View getFooterView() {
-        return mHelper.getFooterView();
+        return mHelper.mFooterView;
     }
 }
