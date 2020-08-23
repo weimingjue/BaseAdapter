@@ -5,7 +5,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.wang.adapters.R;
@@ -37,9 +36,12 @@ public abstract class BaseAdapterRv extends RecyclerView.Adapter<BaseViewHolder>
 
     @Override
     public final void onBindViewHolder(@NonNull BaseViewHolder holder, int position) {
-        //创建点击事件
+        //设置点击事件
         holder.itemView.setOnClickListener(mListener);
         holder.itemView.setOnLongClickListener(mListener);
+        //防止null时抢占事件
+        holder.itemView.setClickable(mListener != null);
+        holder.itemView.setLongClickable(mListener != null);
         onBindViewHolder2(holder, position);
     }
 

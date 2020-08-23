@@ -7,26 +7,33 @@
         <!--        adapter默认会设置并刷新“bean”这个属性-->
         <variable
             name="bean"
-            type="String" />
+            type="com.wang.example.MainActivity.TestBean" />
     </data>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="10dp"
-            android:text="@{bean}"
+            android:text="@{bean.text}"
             android:textColor="#333"
             android:textSize="20sp"
+            android:textStyle="bold"
             tools:text="这是文本" />
 
-        <View
-            android:id="@+id/view_background"
-            android:layout_width="20dp"
-            android:layout_height="20dp"/>
-        </LinearLayout>
+        <Button
+            android:id="@+id/bt_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="按钮" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_item_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 </layout>

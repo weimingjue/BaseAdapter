@@ -129,7 +129,7 @@ public interface OnItemItemClickListener extends OnItemClickListener {
     /**
      * 外层的position需要遍历
      */
-    @Deprecated//不需要重写
+    @Deprecated//不需要重写，可以使用
     default IAdapter getParentAdapter(@NonNull View view) {
         ViewParent parent = view.getParent();
         while (parent != null) {
@@ -147,7 +147,7 @@ public interface OnItemItemClickListener extends OnItemClickListener {
     /**
      * 获取当前view所在的ViewHolder
      */
-    @Deprecated//不需要重写
+    @Deprecated//不需要重写，可以使用
     default BaseViewHolder getParentViewHolder(@NonNull View view) {
         ViewParent parent = view.getParent();
         while (parent != null) {

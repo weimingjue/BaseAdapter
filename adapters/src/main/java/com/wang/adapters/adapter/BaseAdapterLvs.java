@@ -144,11 +144,12 @@ public abstract class BaseAdapterLvs extends PagerAdapter implements ListAdapter
     }
 
     public final void onBindViewHolder(@NonNull BaseViewHolder holder, int position) {
-        //设置点击事件,不判断会顶掉lv的itemClick事件
-        if (mListener != null) {
-            holder.itemView.setOnClickListener(mListener);
-            holder.itemView.setOnLongClickListener(mListener);
-        }
+        //设置点击事件
+        holder.itemView.setOnClickListener(mListener);
+        holder.itemView.setOnLongClickListener(mListener);
+        //防止null时抢占事件
+        holder.itemView.setClickable(mListener != null);
+        holder.itemView.setLongClickable(mListener != null);
         holder.setLvPosition(position);//设置position
         onBindViewHolder2(holder, position);
     }

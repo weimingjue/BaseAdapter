@@ -84,11 +84,60 @@ BaseAdapterRvList<AdapterMainListBinding, String> adapter = BaseAdapterRvList.cr
         @NonNull
         @Override
         public BaseViewHolder<AdapterMainListBinding> onCreateListViewHolder(@NonNull ViewGroup parent) {
-            BaseViewHolder<AdapterMainListBinding> holder = super.onCreateListViewHolder(parent);
+            BaseViewHolder<AdapterMainListBinding> holder = super.onCreateListViewHolder(parent);//也可以不用super
             holder.itemView.setBackgroundColor(0xffeeeeee);
             return holder;
         }
     }
+```
+adapter里有个button，点完后还要写个回调给Activity？？？反正我是不喜欢：
+```
+        public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, TestBean bean) {
+            setItemViewClick(holder.getBinding().btButton, holder);
+        }
+        ...
+        adapter.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(@NonNull View view, int listPosition) {
+                switch (view.getId()) {
+                    case R.id.bt_button:
+                        toast("没想到吧，还能这样玩：" + listPosition);
+                        break;
+                    default:
+                        toast("你点击了整个条目：" + listPosition);
+                        break;
+                }
+            }
+        });
+```
+adapter里又套了一个RecyclerView，简直是回调地狱啊...完全受不了：
+```
+        public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, TestBean bean) {
+            //需提前setAdapter（在bind或者每次create时）
+            setItemRvData(holder.getBinding().rvItemList, holder, bean.itemTextList);
+        ...
+        adapter.setOnItemClickListener(new OnItemItemClickListener() {
+            @Override
+            public void onParentItemClick(@NonNull View view, int parentPosition) {
+                toast("你点击了外层：" + parentPosition);
+            }
+
+            @Override
+            public void onChildItemClick(@NonNull View view, int parentPosition, int childPosition) {
+                toast("你点击了外层：" + parentPosition + "，内层：" + childPosition);
+            }
+
+            @Override
+            public void onParentHeaderClick(@NonNull View view) {
+                toast("你点击了外层：header");
+            }
+
+            @Override
+            public void onChildHeaderClick(@NonNull View view, int parentPosition) {
+                toast("你点击了外层：" + parentPosition + "，内层：header");
+            }
+            //...footer、longClick等都有，需要多看看
+        });
 ```
 ViewPager的Fragment更简单
 ```
@@ -131,7 +180,7 @@ allprojects {
 
 不需要layoutId的混淆要求：
 ```
-#框架特殊要求
+# 框架特殊要求
 # 根据泛型获取res资源需要
 -keep class * extends androidx.databinding.ViewDataBinding
 ```

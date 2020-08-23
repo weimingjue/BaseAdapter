@@ -54,7 +54,7 @@ public interface OnItemClickListener extends View.OnClickListener, View.OnLongCl
     /**
      * 获取当前view所保存的position
      */
-    @Deprecated//不需要重写
+    @Deprecated//不需要重写，可以使用
     default IAdapter getAdapter(@NonNull View view) {
         return (IAdapter) view.getTag(R.id.tag_view_adapter);
     }
@@ -62,7 +62,7 @@ public interface OnItemClickListener extends View.OnClickListener, View.OnLongCl
     /**
      * 获取当前view所在的ViewHolder
      */
-    @Deprecated//不需要重写
+    @Deprecated//不需要重写，可以使用
     default BaseViewHolder getViewHolder(@NonNull View view) {
         return (BaseViewHolder) view.getTag(R.id.tag_view_holder);
     }
@@ -72,7 +72,7 @@ public interface OnItemClickListener extends View.OnClickListener, View.OnLongCl
      *
      * @return {@link #POSITION_HEADER}{@link #POSITION_FOOTER}或者0-list.size
      */
-    @Deprecated//不需要重写
+    @Deprecated//不需要重写，可以使用
     default int getFormatPosition(IAdapter adapter, int position) {
         if (adapter instanceof IListAdapter) {
             //listAdapter有header、footer事件

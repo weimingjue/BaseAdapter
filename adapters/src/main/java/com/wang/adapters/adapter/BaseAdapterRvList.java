@@ -99,7 +99,7 @@ public abstract class BaseAdapterRvList<DB extends ViewDataBinding, BEAN> extend
     }
 
     /**
-     * @param view null表示删除
+     * @param view null表示删除，view的parent为FrameLayout，默认match、wrap
      */
     public void setHeaderView(@Nullable View view) {
         mHelper.setHeaderView(view);
@@ -112,7 +112,7 @@ public abstract class BaseAdapterRvList<DB extends ViewDataBinding, BEAN> extend
     }
 
     /**
-     * @param view null表示删除
+     * @param view null表示删除，view的parent为FrameLayout，默认match、wrap
      */
     @Override
     public void setFooterView(@Nullable View view) {
@@ -130,17 +130,26 @@ public abstract class BaseAdapterRvList<DB extends ViewDataBinding, BEAN> extend
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * 懒得不能再懒了的写法
-     * 就资源id，数据在xml里修改
-     *
-     * @param layoutId create时的资源id
+     * 就资源id，使用dataBinding绑定数据
      */
     public static <BEAN> BaseAdapterRvList<?, BEAN> createAdapter(@LayoutRes final int layoutId) {
-        return createAdapter(null, layoutId, null);
+        return createAdapter(null, layoutId);
     }
 
+    /**
+     * 就资源id，使用dataBinding绑定数据
+     */
+    public static <BEAN> BaseAdapterRvList<?, BEAN> createAdapter(@Nullable List<BEAN> list, @LayoutRes final int layoutId) {
+        return createAdapter(list, layoutId, null);
+    }
+
+    /**
+     * 资源id+回调
+     *
+     * @param layoutId 资源id，必须有
+     */
     public static <DB extends ViewDataBinding, BEAN> BaseAdapterRvList<DB, BEAN> createAdapter
-            (@Nullable List<BEAN> list, @LayoutRes final int layoutId, @Nullable final OnAdapterBindListener<DB, BEAN> listener) {
+    (@Nullable List<BEAN> list, @LayoutRes final int layoutId, @Nullable final OnAdapterBindListener<DB, BEAN> listener) {
         return new BaseAdapterRvList<DB, BEAN>(layoutId, list) {
 
             @NonNull

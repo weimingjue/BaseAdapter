@@ -4,21 +4,26 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.wang.adapters.adapter.BaseAdapterRvList;
-import com.wang.adapters.interfaces.OnItemClickListener;
+import com.wang.adapters.interfaces.OnItemItemClickListener;
 import com.wang.container.holder.BaseViewHolder;
 import com.wang.example.databinding.AdapterMainListBinding;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,12 +33,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        findViewById(R.id.tv_main_vp).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(ViewPagerFragActivity.class);
-            }
-        });
+        findViewById(R.id.tv_main_vp).setOnClickListener(v -> startActivity(ViewPagerFragActivity.class));
         mRv = findViewById(R.id.rv_main);
         listTest();
     }
@@ -42,14 +42,21 @@ public class MainActivity extends AppCompatActivity {
      * 简单的列表测试
      */
     private void listTest() {
-        GridLayoutManager manager = new GridLayoutManager(this, 2);
-        mRv.setLayoutManager(manager);
-        final ArrayList<String> list = new ArrayList<>();
-        for (int i = 0; i < 200; i++) {
-            list.add("第" + i);
+        mRv.setLayoutManager(new LinearLayoutManager(this));
+        final ArrayList<TestBean> list = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            TestBean tb = new TestBean();
+            tb.text = "第" + i;
+            if (i % 5 == 0) {
+                tb.itemTextList = new ArrayList<>();
+                for (int j = 0; j < 10; j++) {
+                    tb.itemTextList.add("第" + i + "，子" + j);
+                }
+            }
+            list.add(tb);
         }
 //        BaseAdapterRvList<?, String> adapter = BaseAdapterRvList.createAdapter(R.layout.adapter_main_list);
-        BaseAdapterRvList<?, String> adapter = new ListAdapter();
+        ListAdapter adapter = new ListAdapter();
 //        BaseAdapterRvList<AdapterMainListBinding, String> adapter = BaseAdapterRvList.createAdapter(null, R.layout.adapter_main_list,
 //                (holder, listPosition, s) -> {
 //                    if (s.contains("10")) {
@@ -59,48 +66,61 @@ public class MainActivity extends AppCompatActivity {
         adapter.setListAndNotifyDataSetChanged(list);
         mRv.setAdapter(adapter);
         //设置点击事件
-        adapter.setOnItemClickListener(new OnItemClickListener() {
+        adapter.setOnItemClickListener(new OnItemItemClickListener() {
             @Override
-            public void onItemClick(@NonNull View view, int listPosition) {
-                Toast.makeText(MainActivity.this, "点击第" + list.get(listPosition), Toast.LENGTH_SHORT).show();
+            public void onParentItemClick(@NonNull View view, int parentPosition) {
+                switch (view.getId()) {
+                    case R.id.bt_button:
+                        toast("没想到吧，还能这样玩");
+                        break;
+                    default:
+                        toast("你点击了外层：" + parentPosition);
+                        break;
+                }
             }
 
             @Override
-            public boolean onItemLongClick(@NonNull View view, int listPosition) {
-                Toast.makeText(MainActivity.this, "长按第" + list.get(listPosition), Toast.LENGTH_SHORT).show();
-                return true;
+            public void onChildItemClick(@NonNull View view, int parentPosition, int childPosition) {
+                toast("你点击了外层：" + parentPosition + "，内层：" + childPosition);
             }
 
             @Override
-            public void onFooterClick(@NonNull View view) {
-                Toast.makeText(MainActivity.this, "footer被点击", Toast.LENGTH_SHORT).show();
+            public void onParentHeaderClick(@NonNull View view) {
+                toast("你点击了外层：header");
+            }
+
+            @Override
+            public void onChildHeaderClick(@NonNull View view, int parentPosition) {
+                toast("你点击了外层：" + parentPosition + "，内层：header");
             }
         });
+        //添加头
+        AppCompatTextView tv = new AppCompatTextView(this);
+        tv.setText("外层的header");
+        tv.setTextSize(30);
+        adapter.setHeaderView(tv);
         //添加尾
         AppCompatImageView iv = new AppCompatImageView(this);
         iv.setImageResource(R.mipmap.ic_launcher);
         iv.setAdjustViewBounds(true);
         adapter.setFooterView(iv);
-        //GridLayoutManager需要将头或尾占多行
-        manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-            @Override
-            public int getSpanSize(int position) {
-                return position == list.size() ? 2 : 1;
-            }
-        });
     }
 
-    public static class ListAdapter extends BaseAdapterRvList<AdapterMainListBinding, String> {
+    public static class ListAdapter extends BaseAdapterRvList<AdapterMainListBinding, TestBean> {
 
         @Override
-        public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, String s) {
-            if (s.contains("100")) {
-                getList().set(listPosition, "改掉了100");//后面会调用刷新dataBinding
-                holder.getBinding().viewBackground.setBackgroundColor(0xff00ff00);
-            } else if (s.contains("10")) {
-                holder.getBinding().viewBackground.setBackgroundColor(0xff999999);
+        public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, TestBean bean) {
+            setItemViewClick(holder.getBinding().btButton, holder);
+            setItemRvData(holder.getBinding().rvItemList, holder, bean.itemTextList);
+            MyAdapter adapter = (MyAdapter) holder.getBinding().rvItemList.getAdapter();
+            if (bean.itemTextList != null && bean.itemTextList.size() > 0) {
+                TextView footerTv = new TextView(holder.getContext());
+                footerTv.setText("内层的footer，外层position" + listPosition);
+                footerTv.setTextColor(0xff999999);
+                footerTv.setTextSize(13);
+                adapter.setFooterView(footerTv);
             } else {
-                holder.getBinding().viewBackground.setBackgroundColor(0xffffffff);
+                adapter.setFooterView(null);
             }
         }
 
@@ -108,12 +128,49 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public BaseViewHolder<AdapterMainListBinding> onCreateListViewHolder(@NonNull ViewGroup parent) {
             BaseViewHolder<AdapterMainListBinding> holder = super.onCreateListViewHolder(parent);
-            holder.itemView.setBackgroundColor(0xffeeeeee);
+            holder.getBinding().rvItemList.setLayoutManager(new GridLayoutManager(parent.getContext(), 2));
+            MyAdapter adapter = new MyAdapter();
+            TextView headerTv = new TextView(parent.getContext());
+            headerTv.setText("内层的header一直有");
+            headerTv.setTextColor(0xff999999);
+            headerTv.setTextSize(13);
+            adapter.setHeaderView(headerTv);
+            holder.getBinding().rvItemList.setAdapter(adapter);
+            holder.getBinding().rvItemList.setNestedScrollingEnabled(false);
             return holder;
         }
+
+        private class MyAdapter extends BaseAdapterRvList<ViewDataBinding, String> {
+
+            @Override
+            public void onBindListViewHolder(@NonNull BaseViewHolder<ViewDataBinding> holder, int listPosition, String bean) {
+                TextView tv = (TextView) holder.itemView;
+                tv.setText(bean);
+            }
+
+            @NonNull
+            @Override
+            public BaseViewHolder<ViewDataBinding> onCreateListViewHolder(@NonNull ViewGroup parent) {
+                TextView tv = new AppCompatTextView(parent.getContext());
+                tv.setTextColor(0xffff00ff);
+                tv.setTextSize(15);
+                tv.setPadding(50, 10, 50, 10);
+                tv.setTag(R.id.tag_view_no_data_binding, "");
+                return new BaseViewHolder<>(tv);
+            }
+        }
+    }
+
+    public static class TestBean {
+        public String text;
+        public List<String> itemTextList;
     }
 
     public void startActivity(Class c) {
         startActivity(new Intent(this, c));
+    }
+
+    public void toast(String st) {
+        Toast.makeText(this, st, Toast.LENGTH_SHORT).show();
     }
 }

@@ -10,6 +10,7 @@ import androidx.databinding.ViewDataBinding;
 
 import com.wang.adapters.helper.ListAdapterHelper;
 import com.wang.adapters.interfaces.OnItemClickListener;
+import com.wang.adapters.utils.ArrayUtils;
 import com.wang.container.holder.BaseViewHolder;
 import com.wang.container.interfaces.IListAdapter;
 
@@ -22,6 +23,8 @@ public abstract class BaseAdapterRvListCycle<DB extends ViewDataBinding, BEAN> e
         implements IListAdapter<BEAN, DB, OnItemClickListener> {
 
     private final ListAdapterHelper<DB, BEAN> mHelper;
+
+    private boolean mIsCycle = true;
 
     /**
      * 资源id已经不是必须的了
@@ -45,7 +48,10 @@ public abstract class BaseAdapterRvListCycle<DB extends ViewDataBinding, BEAN> e
 
     @Override
     public final int getItemCount() {
-        return getList().isEmpty() ? 0 : Integer.MAX_VALUE;
+        if (ArrayUtils.isEmpty(getList())) {
+            return 0;
+        }
+        return isCycle() ? Integer.MAX_VALUE : size();
     }
 
     @Override
@@ -122,5 +128,19 @@ public abstract class BaseAdapterRvListCycle<DB extends ViewDataBinding, BEAN> e
     @Override
     public BaseViewHolder<DB> onCreateListViewHolder(@NonNull ViewGroup parent) {
         return mHelper.onCreateDefaultViewHolder(parent, BaseAdapterLvsListCycle.class, getClass());
+    }
+
+    /**
+     * @param isCycle true 默认值，可循环滑动
+     */
+    public void setCycle(boolean isCycle) {
+        if (isCycle != mIsCycle) {
+            mIsCycle = isCycle;
+            notifyDataSetChanged();
+        }
+    }
+
+    public boolean isCycle() {
+        return mIsCycle;
     }
 }
