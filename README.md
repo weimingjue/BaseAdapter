@@ -34,22 +34,24 @@
 ```
 自带点击事件
 ```
-        adapter.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(@NonNull View view, int listPosition) {
-            }
+adapter.setOnItemClickListener(new OnItemClickListener() {
+    @Override
+    public void onItemClick(@NonNull View view, int listPosition) {
+    }
 
-            @Override
-            public boolean onItemLongClick(@NonNull View view, int listPosition) {
-                return true;
-            }
+    @Override
+    public boolean onItemLongClick(@NonNull View view, int listPosition) {
+        return true;
+    }
 
-            @Override
-            protected void onFooterClick(@NonNull View view) {
-                super.onFooterClick(view);
-            }
-            //...header、footer long click
-        });
+    @Override
+    protected void onFooterClick(@NonNull View view) {
+        super.onFooterClick(view);
+    }
+    //...header、footer long click
+});
+//只有onItemClick也可以使用语法糖：
+adapter.setOnItemClickListener((view, listPosition) -> toast("你点击了：" + listPosition));
 ```
 自带header、footer
 ```
@@ -67,79 +69,97 @@ BaseAdapterRvList<AdapterMainListBinding, String> adapter = BaseAdapterRvList.cr
 ```
 也可以完全自定义（没有看错，不需要layoutId）
 ```
-    public static class ListAdapter extends BaseAdapterRvList<AdapterMainListBinding, String> {
+public static class ListAdapter extends BaseAdapterRvList<AdapterMainListBinding, String> {
 
-        @Override
-        public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, String s) {
-            if (s.contains("100")) {
-                getList().set(listPosition, "改掉了100");//后面会调用刷新dataBinding
-                holder.getBinding().viewBackground.setBackgroundColor(0xff00ff00);
-            } else if (s.contains("10")) {
-                holder.getBinding().viewBackground.setBackgroundColor(0xff999999);
-            } else {
-                holder.getBinding().viewBackground.setBackgroundColor(0xffffffff);
-            }
-        }
-
-        @NonNull
-        @Override
-        public BaseViewHolder<AdapterMainListBinding> onCreateListViewHolder(@NonNull ViewGroup parent) {
-            BaseViewHolder<AdapterMainListBinding> holder = super.onCreateListViewHolder(parent);//也可以不用super
-            holder.itemView.setBackgroundColor(0xffeeeeee);
-            return holder;
+    @Override
+    public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, String s) {
+        if (s.contains("100")) {
+            getList().set(listPosition, "改掉了100");//后面会调用刷新dataBinding
+            holder.getBinding().viewBackground.setBackgroundColor(0xff00ff00);
+        } else if (s.contains("10")) {
+            holder.getBinding().viewBackground.setBackgroundColor(0xff999999);
+        } else {
+            holder.getBinding().viewBackground.setBackgroundColor(0xffffffff);
         }
     }
+
+    @NonNull
+    @Override
+    public BaseViewHolder<AdapterMainListBinding> onCreateListViewHolder(@NonNull ViewGroup parent) {
+        BaseViewHolder<AdapterMainListBinding> holder = super.onCreateListViewHolder(parent);
+        holder.itemView.setBackgroundColor(0xffeeeeee);
+        return holder;
+    }
+}
 ```
 adapter里有个button，点完后还要写个回调给Activity？？？反正我是不喜欢：
 ```
-        public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, TestBean bean) {
-            setItemViewClick(holder.getBinding().btButton, holder);
+public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, TestBean bean) {
+    setItemViewClick(holder.getBinding().btButton, holder);
+}
+...
+adapter.setOnItemClickListener(new OnItemClickListener() {
+    @Override
+    public void onItemClick(@NonNull View view, int listPosition) {
+        switch (view.getId()) {
+            case R.id.bt_button:
+                toast("没想到吧，还能这样玩：" + listPosition);
+                break;
+            default:
+                toast("你点击了整个条目：" + listPosition);
+                break;
         }
-        ...
-        adapter.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(@NonNull View view, int listPosition) {
-                switch (view.getId()) {
-                    case R.id.bt_button:
-                        toast("没想到吧，还能这样玩：" + listPosition);
-                        break;
-                    default:
-                        toast("你点击了整个条目：" + listPosition);
-                        break;
-                }
-            }
-        });
+    }
+});
 ```
 adapter里又套了一个RecyclerView，简直是回调地狱啊...完全受不了：
 ```
-        public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, TestBean bean) {
-            //需提前setAdapter（在bind或者每次create时）
-            setItemRvData(holder.getBinding().rvItemList, holder, bean.itemTextList);
-        ...
-        adapter.setOnItemClickListener(new OnItemItemClickListener() {
-            @Override
-            public void onParentItemClick(@NonNull View view, int parentPosition) {
-                toast("你点击了外层：" + parentPosition);
-            }
+public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, TestBean bean) {
+    //需提前setAdapter、layoutManager（在bind或者每次create时）
+    setItemRvData(holder.getBinding().rvItemList, holder, bean.itemTextList);
+...
+adapter.setOnItemClickListener(new OnItemItemClickListener() {
+    @Override
+    public void onParentItemClick(@NonNull View view, int parentPosition) {
+        toast("你点击了外层：" + parentPosition);
+    }
 
-            @Override
-            public void onChildItemClick(@NonNull View view, int parentPosition, int childPosition) {
-                toast("你点击了外层：" + parentPosition + "，内层：" + childPosition);
-            }
+    @Override
+    public void onChildItemClick(@NonNull View view, int parentPosition, int childPosition) {
+        toast("你点击了外层：" + parentPosition + "，内层：" + childPosition);
+    }
 
-            @Override
-            public void onParentHeaderClick(@NonNull View view) {
-                toast("你点击了外层：header");
-            }
+    @Override
+    public void onParentHeaderClick(@NonNull View view) {
+        toast("你点击了外层：header");
+    }
 
-            @Override
-            public void onChildHeaderClick(@NonNull View view, int parentPosition) {
-                toast("你点击了外层：" + parentPosition + "，内层：header");
-            }
-            //...footer、longClick等都有，需要多看看
-        });
+    @Override
+    public void onChildHeaderClick(@NonNull View view, int parentPosition) {
+        toast("你点击了外层：" + parentPosition + "，内层：header");
+    }
+    //...footer、longClick等都有，需要多看看
+});
 ```
-ViewPager的Fragment更简单
+### 特殊情况
+如果真的不想加混淆，则adapter的构造里传入layoutRes即可
+```
+public MyAdapter() {
+    super(R.layout.adapter_main_list, null);
+}
+```
+如果真的不想使用dataBinding，则覆盖onCreateListViewHolder方法，不调用super即可
+```
+@NonNull
+@Override
+public BaseViewHolder<ViewDataBinding> onCreateListViewHolder(@NonNull ViewGroup parent) {
+    TextView tv = new AppCompatTextView(parent.getContext());
+    tv.setTag(R.id.tag_view_no_data_binding, "");
+    return new BaseViewHolder<>(tv);
+}
+```
+
+### ViewPager的Fragment更简单
 ```
 mVp.setAdapter(new BaseFragmentPagerAdapter(getSupportFragmentManager(), mFrags));
 //或
