@@ -8,6 +8,11 @@
         <variable
             name="bean"
             type="com.wang.example.MainActivity.TestBean" />
+
+        <!--        adapter默认会设置adapter自己-->
+        <variable
+            name="adapter"
+            type="com.wang.example.MainActivity.ListAdapter" />
     </data>
 
     <LinearLayout
@@ -27,6 +32,7 @@
 
         <Button
             android:id="@+id/bt_button"
+            setItemViewClick="@{adapter}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="按钮" />

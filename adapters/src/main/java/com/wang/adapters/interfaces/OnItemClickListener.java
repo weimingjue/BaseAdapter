@@ -1,11 +1,11 @@
 package com.wang.adapters.interfaces;
 
+import android.annotation.SuppressLint;
 import android.view.View;
 
+import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 
-import com.wang.adapters.R;
-import com.wang.container.holder.BaseViewHolder;
 import com.wang.container.interfaces.IAdapter;
 import com.wang.container.interfaces.IItemClick;
 import com.wang.container.interfaces.IListAdapter;
@@ -13,15 +13,15 @@ import com.wang.container.interfaces.IListAdapter;
 /**
  * 点击,长按,header,footer的回调
  */
-public interface OnItemClickListener extends View.OnClickListener, View.OnLongClickListener, IItemClick {
+public interface OnItemClickListener extends IItemClick {
     int POSITION_HEADER = -1, POSITION_FOOTER = -2;
 
-    @Deprecated//不需要重写
+    @CallSuper//一般不需要重写，所以加了此限制（如果真的不想调用super可以注解抑制掉错误）
     @Override
+    @SuppressLint("MissingSuperCall")
     default void onClick(@NonNull View view) {
         IAdapter adapter = getAdapter(view);
-        int position = getViewHolder(view).getCommonPosition();
-        int formatPosition = getFormatPosition(adapter, position);
+        int formatPosition = getFormatPosition(adapter, getViewPosition(view));
         switch (formatPosition) {
             case POSITION_HEADER:
                 onHeaderClick(view);
@@ -35,12 +35,12 @@ public interface OnItemClickListener extends View.OnClickListener, View.OnLongCl
         }
     }
 
-    @Deprecated//不需要重写
+    @CallSuper
     @Override
+    @SuppressLint("MissingSuperCall")
     default boolean onLongClick(@NonNull View view) {
         IAdapter adapter = getAdapter(view);
-        int position = getViewHolder(view).getCommonPosition();
-        int formatPosition = getFormatPosition(adapter, position);
+        int formatPosition = getFormatPosition(adapter, getViewPosition(view));
         switch (formatPosition) {
             case POSITION_HEADER:
                 return onHeaderLongClick(view);
@@ -52,19 +52,12 @@ public interface OnItemClickListener extends View.OnClickListener, View.OnLongCl
     }
 
     /**
-     * 获取当前view所保存的position
+     * 获取当前view所在的position，注意header、footer
      */
-    @Deprecated//不需要重写，可以使用
-    default IAdapter getAdapter(@NonNull View view) {
-        return (IAdapter) view.getTag(R.id.tag_view_adapter);
-    }
-
-    /**
-     * 获取当前view所在的ViewHolder
-     */
-    @Deprecated//不需要重写，可以使用
-    default BaseViewHolder getViewHolder(@NonNull View view) {
-        return (BaseViewHolder) view.getTag(R.id.tag_view_holder);
+    @CallSuper
+    @Override
+    default int getViewPosition(@NonNull View view) {
+        return getViewHolder(view).getCommonPosition();
     }
 
     /**
@@ -72,7 +65,7 @@ public interface OnItemClickListener extends View.OnClickListener, View.OnLongCl
      *
      * @return {@link #POSITION_HEADER}{@link #POSITION_FOOTER}或者0-list.size
      */
-    @Deprecated//不需要重写，可以使用
+    @CallSuper
     default int getFormatPosition(IAdapter adapter, int position) {
         if (adapter instanceof IListAdapter) {
             //listAdapter有header、footer事件

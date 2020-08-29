@@ -1,6 +1,5 @@
 package com.wang.adapters.adapter;
 
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -9,12 +8,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.wang.adapters.R;
 import com.wang.adapters.interfaces.OnItemClickListener;
-import com.wang.adapters.interfaces.OnItemItemClickListener;
 import com.wang.container.holder.BaseViewHolder;
 import com.wang.container.interfaces.IAdapter;
-import com.wang.container.interfaces.IListAdapter;
-
-import java.util.List;
 
 /**
  * 适用于rv、我自定义的{@link BaseSuperAdapter}
@@ -25,6 +20,7 @@ public abstract class BaseAdapterRv extends RecyclerView.Adapter<BaseViewHolder>
 
     public final String TAG = getClass().getSimpleName();
     protected OnItemClickListener mListener;
+    protected BaseViewHolder mBindTempViewHolder;
 
     @Override
     public final BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -36,6 +32,7 @@ public abstract class BaseAdapterRv extends RecyclerView.Adapter<BaseViewHolder>
 
     @Override
     public final void onBindViewHolder(@NonNull BaseViewHolder holder, int position) {
+        mBindTempViewHolder = holder;
         //设置点击事件
         holder.itemView.setOnClickListener(mListener);
         holder.itemView.setOnLongClickListener(mListener);
@@ -43,6 +40,19 @@ public abstract class BaseAdapterRv extends RecyclerView.Adapter<BaseViewHolder>
         holder.itemView.setClickable(mListener != null);
         holder.itemView.setLongClickable(mListener != null);
         onBindViewHolder2(holder, position);
+    }
+
+    /**
+     * 正在bind时的ViewHolder，方便xml中使用dataBinding设置点击事件
+     */
+    public BaseViewHolder getBindTempViewHolder() {
+        return mBindTempViewHolder;
+    }
+
+    @Nullable
+    @Override
+    public OnItemClickListener getOnItemClickListener() {
+        return mListener;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -61,35 +71,6 @@ public abstract class BaseAdapterRv extends RecyclerView.Adapter<BaseViewHolder>
 //    public int getItemViewType(int position) {
 //        return 0;
 //    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // 以下是增加的方法
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 给view设置点击事件到{@link #mListener}中
-     * <p>
-     * 点击回调见{@link #setOnItemClickListener}{@link OnItemClickListener}
-     */
-    protected final void setItemViewClick(View view, BaseViewHolder holder) {
-        view.setTag(R.id.tag_view_holder, holder);
-        view.setTag(R.id.tag_view_adapter, this);
-        if (!(view instanceof RecyclerView)) view.setOnClickListener(mListener);
-    }
-
-    /**
-     * 给rv设置点击事件和数据
-     * 点击回调必须使用{@link OnItemItemClickListener}，否则回调将会错乱
-     */
-    protected final void setItemRvData(RecyclerView rv, BaseViewHolder holder, List<?> adapterList) {
-        rv.setTag(R.id.tag_view_holder, holder);
-        rv.setTag(R.id.tag_view_adapter, this);
-        IListAdapter adapter = (IListAdapter) rv.getAdapter();
-        //noinspection ConstantConditions,unchecked
-        adapter.setOnItemClickListener(mListener);
-        //noinspection unchecked 忽略未检查错误,如果出异常说明你传的list和你的adapter对不上
-        adapter.setListAndNotifyDataSetChanged(adapterList);
-    }
 
     protected abstract void onBindViewHolder2(@NonNull BaseViewHolder holder, int position);
 

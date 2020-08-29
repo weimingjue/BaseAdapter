@@ -4,6 +4,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
+import androidx.annotation.CallSuper;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,37 +34,37 @@ public interface OnItemItemClickListener extends OnItemClickListener {
     @interface ClickType {
     }//该变量只能传入上面几种,否则会报错
 
-    @Deprecated//不需要重写
+    @CallSuper//一般不需要重写，所以加了此限制（如果真的不想调用super可以注解抑制掉错误）
     @Override
     default void onItemClick(@NonNull View view, int listPosition) {
         performClick(view, ITEM_CLICK, listPosition);
     }
 
-    @Deprecated//不需要重写
+    @CallSuper
     @Override
     default boolean onItemLongClick(@NonNull View view, int listPosition) {
         return performClick(view, ITEM_LONG_CLICK, listPosition);
     }
 
-    @Deprecated//不需要重写
+    @CallSuper
     @Override
     default void onHeaderClick(@NonNull View view) {
         performClick(view, ITEM_HEADER_CLICK, 0);
     }
 
-    @Deprecated//不需要重写
+    @CallSuper
     @Override
     default boolean onHeaderLongClick(@NonNull View view) {
         return performClick(view, ITEM_HEADER_LONG_CLICK, 0);
     }
 
-    @Deprecated//不需要重写
+    @CallSuper
     @Override
     default void onFooterClick(@NonNull View view) {
         performClick(view, ITEM_FOOTER_CLICK, 0);
     }
 
-    @Deprecated//不需要重写
+    @CallSuper
     @Override
     default boolean onFooterLongClick(@NonNull View view) {
         return performClick(view, ITEM_FOOTER_LONG_CLICK, 0);
@@ -72,7 +73,7 @@ public interface OnItemItemClickListener extends OnItemClickListener {
     /**
      * 总的点击分发
      */
-    @Deprecated//不需要重写
+    @CallSuper
     default boolean performClick(View view, @ClickType int clickType, int listPosition) {
         IAdapter parentAdapter = getParentAdapter(view);
         if (parentAdapter == null) {
@@ -129,7 +130,7 @@ public interface OnItemItemClickListener extends OnItemClickListener {
     /**
      * 外层的position需要遍历
      */
-    @Deprecated//不需要重写，可以使用
+    @CallSuper
     default IAdapter getParentAdapter(@NonNull View view) {
         ViewParent parent = view.getParent();
         while (parent != null) {
@@ -147,7 +148,7 @@ public interface OnItemItemClickListener extends OnItemClickListener {
     /**
      * 获取当前view所在的ViewHolder
      */
-    @Deprecated//不需要重写，可以使用
+    @CallSuper
     default BaseViewHolder getParentViewHolder(@NonNull View view) {
         ViewParent parent = view.getParent();
         while (parent != null) {

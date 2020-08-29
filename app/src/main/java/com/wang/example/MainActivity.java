@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
             public void onParentItemClick(@NonNull View view, int parentPosition) {
                 switch (view.getId()) {
                     case R.id.bt_button:
-                        toast("没想到吧，还能这样玩");
+                        toast("没想到吧，还能这样玩：" + parentPosition);
                         break;
                     default:
                         toast("你点击了外层：" + parentPosition);
@@ -85,6 +85,25 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
+            public boolean onParentItemLongClick(@NonNull View view, int parentPosition) {
+                switch (view.getId()) {
+                    case R.id.bt_button:
+                        toast("长按没想到吧，还能这样玩：" + parentPosition);
+                        break;
+                    default:
+                        toast("你长按了外层：" + parentPosition);
+                        break;
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onChildItemLongClick(@NonNull View view, int parentPosition, int childPosition) {
+                toast("你长按了外层：" + parentPosition + "，内层：" + childPosition);
+                return true;
+            }
+
+            @Override
             public void onParentHeaderClick(@NonNull View view) {
                 toast("你点击了外层：header");
             }
@@ -92,6 +111,40 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChildHeaderClick(@NonNull View view, int parentPosition) {
                 toast("你点击了外层：" + parentPosition + "，内层：header");
+            }
+
+            @Override
+            public boolean onParentHeaderLongClick(@NonNull View view) {
+                toast("你长按了外层：header");
+                return true;
+            }
+
+            @Override
+            public boolean onChildHeaderLongClick(@NonNull View view, int parentPosition) {
+                toast("你长按了外层：" + parentPosition + "，内层：header");
+                return true;
+            }
+
+            @Override
+            public void onParentFooterClick(@NonNull View view) {
+                toast("你点击了外层：footer");
+            }
+
+            @Override
+            public void onChildFooterClick(@NonNull View view, int parentPosition) {
+                toast("你点击了外层：" + parentPosition + "，内层：footer");
+            }
+
+            @Override
+            public boolean onParentFooterLongClick(@NonNull View view) {
+                toast("你长按了外层：footer");
+                return true;
+            }
+
+            @Override
+            public boolean onChildFooterLongClick(@NonNull View view, int parentPosition) {
+                toast("你长按了外层：" + parentPosition + "，内层：footer");
+                return true;
             }
         });
         //添加头
@@ -110,7 +163,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, TestBean bean) {
-            setItemViewClick(holder.getBinding().btButton, holder);
             setItemRvData(holder.getBinding().rvItemList, holder, bean.itemTextList);
             MyAdapter adapter = (MyAdapter) holder.getBinding().rvItemList.getAdapter();
             if (bean.itemTextList != null && bean.itemTextList.size() > 0) {
@@ -140,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
             return holder;
         }
 
-        private class MyAdapter extends BaseAdapterRvList<ViewDataBinding, String> {
+        private static class MyAdapter extends BaseAdapterRvList<ViewDataBinding, String> {
 
             @Override
             public void onBindListViewHolder(@NonNull BaseViewHolder<ViewDataBinding> holder, int listPosition, String bean) {

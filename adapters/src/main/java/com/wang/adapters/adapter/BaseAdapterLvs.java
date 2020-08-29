@@ -26,6 +26,7 @@ public abstract class BaseAdapterLvs extends PagerAdapter implements ListAdapter
     public final String TAG = getClass().getSimpleName();
     private final ViewRecycler<View> mRecycler = new ViewRecycler<>();
     protected OnItemClickListener mListener;
+    protected BaseViewHolder mBindTempViewHolder;
 
     ///////////////////////////////////////////////////////////////////////////
     // lv相关
@@ -144,6 +145,7 @@ public abstract class BaseAdapterLvs extends PagerAdapter implements ListAdapter
     }
 
     public final void onBindViewHolder(@NonNull BaseViewHolder holder, int position) {
+        mBindTempViewHolder = holder;
         //设置点击事件
         holder.itemView.setOnClickListener(mListener);
         holder.itemView.setOnLongClickListener(mListener);
@@ -152,6 +154,19 @@ public abstract class BaseAdapterLvs extends PagerAdapter implements ListAdapter
         holder.itemView.setLongClickable(mListener != null);
         holder.setLvPosition(position);//设置position
         onBindViewHolder2(holder, position);
+    }
+
+    /**
+     * 正在bind时的ViewHolder，方便xml中使用dataBinding设置点击事件
+     */
+    public BaseViewHolder getBindTempViewHolder() {
+        return mBindTempViewHolder;
+    }
+
+    @Nullable
+    @Override
+    public OnItemClickListener getOnItemClickListener() {
+        return mListener;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -181,10 +196,6 @@ public abstract class BaseAdapterLvs extends PagerAdapter implements ListAdapter
     public int getItemViewType(int position) {
         return 0;
     }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // 以下是增加的方法
-    ///////////////////////////////////////////////////////////////////////////
 
     protected abstract void onBindViewHolder2(@NonNull BaseViewHolder holder, int position);
 

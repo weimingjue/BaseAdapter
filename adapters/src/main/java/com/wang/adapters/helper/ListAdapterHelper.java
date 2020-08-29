@@ -8,8 +8,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.ViewDataBinding;
 
-import com.wang.adapters.BR;
 import com.wang.adapters.utils.GenericUtils;
+import com.wang.container.BR;
 import com.wang.container.helper.BaseListAdapterHelper;
 import com.wang.container.holder.BaseViewHolder;
 import com.wang.container.interfaces.IListAdapter;
@@ -81,6 +81,7 @@ public class ListAdapterHelper<DB extends ViewDataBinding, BEAN> extends BaseLis
                 int listPosition = getListPosition(position);
                 if (holder.getBinding() != null) {
                     holder.getBinding().setVariable(BR.bean, mList.get(listPosition));
+                    holder.getBinding().setVariable(BR.adapter, mAdapter);
                 }
                 //noinspection unchecked
                 mAdapter.onBindListViewHolder((BaseViewHolder<DB>) holder, listPosition, mList.get(listPosition));

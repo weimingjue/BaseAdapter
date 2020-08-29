@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#fff"
-    android:orientation="vertical"
-    >
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/tv_viewpagerfrag_ShuaXin"
@@ -14,11 +12,10 @@
         android:padding="10dp"
         android:text="刷新position=2，不会白屏，其他的白屏"
         android:textColor="#333"
-        android:textSize="20sp"
-        />
+        android:textSize="20sp" />
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/vp_viewpagerfrag"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 </LinearLayout>
