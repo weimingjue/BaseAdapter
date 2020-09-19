@@ -117,6 +117,7 @@ adapter里又套了一个RecyclerView，简直是回调地狱啊...完全受不�
 public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, TestBean bean) {
     //需提前setAdapter、layoutManager（在bind或者每次create时）
     setItemRvData(holder.getBinding().rvItemList, holder, bean.itemTextList);
+}
 ...
 adapter.setOnItemClickListener(new OnItemItemClickListener() {
     @Override
