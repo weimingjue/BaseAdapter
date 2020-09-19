@@ -207,7 +207,6 @@ public class MainActivity extends AppCompatActivity {
                 tv.setTextColor(0xffff00ff);
                 tv.setTextSize(15);
                 tv.setPadding(50, 10, 50, 10);
-                tv.setTag(R.id.tag_view_no_data_binding, "");
                 return new BaseViewHolder<>(tv);
             }
         }
