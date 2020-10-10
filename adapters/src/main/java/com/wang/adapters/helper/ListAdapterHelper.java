@@ -8,11 +8,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.ViewDataBinding;
 
-import com.wang.adapters.utils.GenericUtils;
 import com.wang.container.BR;
 import com.wang.container.helper.BaseListAdapterHelper;
 import com.wang.container.holder.BaseViewHolder;
 import com.wang.container.interfaces.IListAdapter;
+import com.wang.container.utils.GenericUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
