@@ -1,9 +1,8 @@
 # 代码非常简单，基于dataBinding
 
 ## 详细示例见本项目app下的MainActivity
-### 说明：adapter的功能、方向及逻辑已经明确，后续将稳定发版，不会有较大改动
 
-一个listAdapter只需要如下一行（没错，总共就一行）
+一个简单的listAdapter只需要如下一行（没看错，总共就一行）
 ```
    BaseAdapterRvList<?, String> adapter = BaseAdapterRvList.createAdapter(R.layout.adapter_main_list);
 ```
@@ -55,7 +54,7 @@ adapter.setOnItemClickListener((view, listPosition) -> toast("你点击了：" +
 ```
 自带header、footer
 ```
-adapter.setHeaderView(view);
+adapter.setHeaderView(context, R.layout.adapter_main_header);//根布局可以使用height、layout_margin、layout_gravity相关属性
 adapter.setFooterView(view);
 ```
 当然你也可以自定义一些简单逻辑
@@ -67,7 +66,7 @@ BaseAdapterRvList<AdapterMainListBinding, String> adapter = BaseAdapterRvList.cr
             }
         });//回调还有onViewHolderCreated方法
 ```
-也可以完全自定义（没有看错，不需要layoutId）
+也可以完全自定义（没看错，不需要layoutId）
 ```
 public static class ListAdapter extends BaseAdapterRvList<AdapterMainListBinding, String> {
 
@@ -197,7 +196,7 @@ allprojects {
 ```
 
 ### AndroidX dataBinding：
-`（api或）implementation 'com.github.weimingjue:BaseAdapter:4.1.3'`
+`（api或）implementation 'com.github.weimingjue:BaseAdapter:4.1.4'`
 
 不需要layoutId的混淆要求：
 ```

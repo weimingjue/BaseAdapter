@@ -148,10 +148,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         //添加头
-        AppCompatTextView tv = new AppCompatTextView(this);
-        tv.setText("外层的header");
-        tv.setTextSize(30);
-        adapter.setHeaderView(tv);
+        adapter.setHeaderView(this, R.layout.adapter_main_header);
         //添加尾
         AppCompatImageView iv = new AppCompatImageView(this);
         iv.setImageResource(R.mipmap.ic_launcher);
