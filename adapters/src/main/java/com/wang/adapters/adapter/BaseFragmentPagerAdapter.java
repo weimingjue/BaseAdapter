@@ -1,9 +1,12 @@
 package com.wang.adapters.adapter;
 
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,5 +79,20 @@ public final class BaseFragmentPagerAdapter extends FragmentPagerAdapter {
             return mTitles.get(position);
 
         return null;
+    }
+
+    /**
+     * 根据fragment的根布局来获取position
+     * 场景：{@link ViewPager.PageTransformer}
+     *
+     * @param rootView adapter的根布局
+     */
+    public int getRootViewPosition(View rootView) {
+        for (int i = 0; i < mFragments.size(); i++) {
+            if (mFragments.get(i).getView() == rootView) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

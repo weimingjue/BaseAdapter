@@ -177,6 +177,13 @@ mVp.setAdapter(adapter);
 ...
 adapter.notifyAllItem(1);//保留展示的frag这样就不会白屏了，想要刷新这个frag当然需要自己frag内部刷新了，详见app下的示例
 ```
+PageTransformer不能获得view的position？手动写TAG+重写getItemPosition（这个方法的意义不多说吧）？简直无力吐槽：
+```
+//fragment的
+int fragPosition = BaseFragmentPagerAdapter对象.getRootViewPosition(View rootView);
+//普通adapter的
+int adapterPosition = BaseAdapterLvs子类.getRootViewPosition(View rootView);
+```
 还有适用于各种复杂样式的adapter容器（如：聊天列表，首页、今日头条的列表等）：
 ```
 本项目已默认导入，直接使用即可：https://github.com/weimingjue/BaseContainerAdapter
@@ -196,7 +203,7 @@ allprojects {
 ```
 
 ### AndroidX dataBinding：
-`（api或）implementation 'com.github.weimingjue:BaseAdapter:4.1.4'`
+`（api或）implementation 'com.github.weimingjue:BaseAdapter:4.1.5'`
 
 不需要layoutId的混淆要求：
 ```

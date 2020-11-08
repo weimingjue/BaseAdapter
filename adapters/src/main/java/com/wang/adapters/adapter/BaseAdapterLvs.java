@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import com.wang.adapters.R;
 import com.wang.adapters.interfaces.OnItemClickListener;
@@ -209,5 +210,16 @@ public abstract class BaseAdapterLvs extends PagerAdapter implements ListAdapter
     public void setOnItemClickListener(@Nullable OnItemClickListener listener) {
         mListener = listener;
         notifyDataSetChanged();
+    }
+
+    /**
+     * 根据fragment的根布局来获取position
+     * 场景：{@link ViewPager.PageTransformer}
+     *
+     * @param rootView adapter的根布局
+     */
+    public int getRootViewPosition(View rootView) {
+        BaseViewHolder holder = (BaseViewHolder) rootView.getTag(R.id.tag_view_holder);
+        return holder.getCommonPosition();
     }
 }
