@@ -171,7 +171,7 @@ public abstract class BaseAdapterRvList<DB extends ViewDataBinding, BEAN> extend
         };
     }
 
-    public interface OnAdapterBindListener<DB extends ViewDataBinding, BEAN> {
+    public interface OnAdapterBindListener<DB extends ViewDataBinding, BEANS> {
 
         /**
          * 当viewHolder创建完成后
@@ -179,6 +179,6 @@ public abstract class BaseAdapterRvList<DB extends ViewDataBinding, BEAN> extend
         default void onViewHolderCreated(BaseViewHolder<DB> holder) {
         }
 
-        void onBindViewHolder(BaseViewHolder<DB> holder, int listPosition, BEAN bean);
+        void onBindViewHolder(BaseViewHolder<DB> holder, int listPosition, BEANS bean);
     }
 }

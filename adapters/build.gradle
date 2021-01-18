@@ -30,5 +30,5 @@ dependencies {
     implementation 'com.zhy:flowlayout-lib:1.0.3'
 
     //自己的适用于超复杂列表样式，如：聊天、首页等
-    api 'com.github.weimingjue:BaseContainerAdapter:3.1.0'
+    api 'com.github.weimingjue:BaseContainerAdapter:3.1.1'
 }
