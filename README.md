@@ -185,8 +185,16 @@ int fragPosition = BaseFragmentPagerAdapter对象.getRootViewPosition(View rootV
 int adapterPosition = BaseAdapterLvs子类.getRootViewPosition(View rootView);
 ```
 还有适用于各种复杂样式的adapter容器（如：聊天列表，首页、今日头条的列表等）：
+
+本项目已默认导入，直接使用即可： [一个通过add其他adapter的超级容器，无论多么复杂的列表样式均可解耦成一个一个的adapter](https://github.com/weimingjue/BaseContainerAdapter)
+
+简单示例（具体请看详情）：
 ```
-本项目已默认导入，直接使用即可：https://github.com/weimingjue/BaseContainerAdapter
+mRv.setLayoutManager(new LinearLayoutManager(this));//如果是GridLayoutManager需要提前设置好，Linear随意
+BaseContainerAdapter baseAdapter = new BaseContainerAdapter();
+mRv.setAdapter(baseAdapter.addAdapter(new TextAdapter(),new ImageAdapter()));
+//...
+baseAdapter.setListAndNotifyDataSetChanged(list);
 ```
 
 ## 导入方式
