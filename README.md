@@ -184,7 +184,29 @@ int fragPosition = BaseFragmentPagerAdapter对象.getRootViewPosition(View rootV
 //普通adapter的
 int adapterPosition = BaseAdapterLvs子类.getRootViewPosition(View rootView);
 ```
-还有适用于各种复杂样式的adapter容器（如：聊天列表，首页、今日头条的列表等）：
+
+### 基于list的简单多条目
+```
+BaseAdapterRvMultipleList<TestBean> adapter = new BaseAdapterRvMultipleList<>();
+//添加条目1
+adapter.addMultipleItem(R.layout.adapter_main_multiple_0, new BaseAdapterRvMultipleList.OnMultipleListListener<AdapterMainMultiple0Binding, TestBean>() {
+    @Override
+    public boolean isThisType(@NonNull BaseAdapterRvMultipleList<TestBean> adapter, int listPosition, @NonNull TestBean bean) {
+        return listPosition % 2 == 0;//true表示这条数据是这个条目的
+    }
+
+    @Override
+    public void onBindListViewHolder(@NonNull BaseAdapterRvMultipleList<TestBean> adapter, @NonNull BaseViewHolder<AdapterMainMultiple0Binding> holder, int listPosition, @NonNull TestBean bean) {
+        holder.getBinding().tvHhh.setTextColor(0xff00ff00);
+    }
+    //当然还有onCreateListViewHolder没写
+})
+//添加条目2，不需要bind直接使用语法糖
+.addMultipleItem(R.layout.adapter_main_multiple_1, (adapter1, listPosition, bean) -> listPosition % 2 != 0);
+```
+**多条目太复杂？**
+
+当然还有适用于各种复杂样式的adapter容器（如：聊天列表，首页、今日头条的列表等）：
 
 本项目已默认导入，直接使用即可： [一个通过add其他adapter的超级容器，无论多么复杂的列表样式均可解耦成一个一个的adapter](https://github.com/weimingjue/BaseContainerAdapter)
 
@@ -196,6 +218,12 @@ mRv.setAdapter(baseAdapter.addAdapter(new TextAdapter(),new ImageAdapter()));
 //...
 baseAdapter.setListAndNotifyDataSetChanged(list);
 ```
+
+## 使用小贴士
+本项目所有的adapter都会内部维护一个List，所以修改数据请一定要使用adapter.getList()，然后notify...
+
+有header、footer调用notifyItem...时请注意+1（Adapter的通病，无解决方案）
+
 
 ## 导入方式
 你的build.gradle要有jitpack.io，大致如下
@@ -211,7 +239,7 @@ allprojects {
 ```
 
 ### AndroidX dataBinding：
-`（api或）implementation 'com.github.weimingjue:BaseAdapter:4.1.7'`
+`（api或）implementation 'com.github.weimingjue:BaseAdapter:4.2.0'`
 
 不需要layoutId的混淆要求：
 ```
