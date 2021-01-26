@@ -78,6 +78,7 @@ public class ListAdapterHelper<DB extends ViewDataBinding, BEAN> extends BaseLis
                 onBindHeaderFooterViewHolder(holder, mFooterView);
                 return;
             case TYPE_BODY:
+            default:
                 int listPosition = getListPosition(position);
                 if (holder.getBinding() != null) {
                     holder.getBinding().setVariable(BR.bean, mList.get(listPosition));

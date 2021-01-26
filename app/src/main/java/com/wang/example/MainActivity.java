@@ -55,14 +55,30 @@ public class MainActivity extends AppCompatActivity {
             }
             list.add(tb);
         }
+        //直接create，逻辑较少推荐使用
 //        BaseAdapterRvList<?, String> adapter = BaseAdapterRvList.createAdapter(R.layout.adapter_main_list);
-        ListAdapter adapter = new ListAdapter();
 //        BaseAdapterRvList<AdapterMainListBinding, String> adapter = BaseAdapterRvList.createAdapter(null, R.layout.adapter_main_list,
 //                (holder, listPosition, s) -> {
 //                    if (s.contains("10")) {
 //                        holder.itemView.setBackgroundColor(0xff999999);
 //                    }
 //                });
+        //自定义方案
+        ListAdapter adapter = new ListAdapter();
+        //多条目
+//        BaseAdapterRvMultipleList<TestBean> adapter = new BaseAdapterRvMultipleList<>();
+//        adapter.addMultipleItem(R.layout.adapter_main_multiple_0, new BaseAdapterRvMultipleList.OnMultipleListListener<AdapterMainMultiple0Binding, TestBean>() {
+//            @Override
+//            public boolean isThisType(@NonNull BaseAdapterRvMultipleList<TestBean> adapter, int listPosition, @NonNull TestBean bean) {
+//                return listPosition % 2 == 0;
+//            }
+//
+//            @Override
+//            public void onBindListViewHolder(@NonNull BaseAdapterRvMultipleList<TestBean> adapter, @NonNull BaseViewHolder<AdapterMainMultiple0Binding> holder, int listPosition, @NonNull TestBean bean) {
+//                holder.getBinding().tvHhh.setTextColor(0xff00ff00);
+//            }
+//        }).addMultipleItem(R.layout.adapter_main_multiple_1, (adapter1, listPosition, bean) -> listPosition % 2 != 0);
+
         adapter.setListAndNotifyDataSetChanged(list);
         mRv.setAdapter(adapter);
         //设置点击事件

@@ -18,8 +18,9 @@ import java.util.List;
 /**
  * RecyclerView listAdapter的基类
  * 可以加header、footer,如果是Grid需要自行处理setSpanSizeLookup头尾的跨度
- * {@link #notifyItemChanged}相关方法时注意有header时需要-1
- * bug:{@link #notifyItemChanged}方法不能刷新header、footer（header、footer不需要刷新，仅仅是先记着）
+ * {@link #notifyItemChanged}相关方法时注意有header时需要+1
+ * <p>
+ * 多条目见{@link BaseAdapterRvMultipleList}
  */
 public abstract class BaseAdapterRvList<DB extends ViewDataBinding, BEAN> extends BaseAdapterRv
         implements IListAdapter<BEAN, DB, OnItemClickListener> {
