@@ -1,7 +1,11 @@
 # 代码非常简单，基于dataBinding
 
-## 详细示例见本项目app下的MainActivity
+### 概览
+本项目主要做了RecyclerView adapter、ListView adapter、ViewPager adapter fragment的封装，旨在减少大量模板代码。
 
+也加了和这些相关连带问题的解决方法：adapter套RecyclerView回调繁琐、动态fragment刷新白屏、ViewPager的Transformer不能获取position、ViewPager ViewPager2高度不能wrap等问题的解决
+
+### 详细介绍
 一个简单的listAdapter只需要如下一行（没看错，总共就一行）
 ```
    BaseAdapterRvList<?, String> adapter = BaseAdapterRvList.createAdapter(R.layout.adapter_main_list);
@@ -66,7 +70,7 @@ BaseAdapterRvList<AdapterMainListBinding, String> adapter = BaseAdapterRvList.cr
             }
         });//回调还有onViewHolderCreated方法
 ```
-也可以完全自定义（没看错，不需要layoutId）
+也可以完全自定义（没看错，不需要layoutId）（适用于复杂逻辑，简单逻辑推荐使用上面方式）
 ```
 public static class ListAdapter extends BaseAdapterRvList<AdapterMainListBinding, String> {
 
@@ -219,6 +223,17 @@ BaseContainerAdapter baseAdapter = new BaseContainerAdapter();
 mRv.setAdapter(baseAdapter.addAdapter(new TextAdapter(),new ImageAdapter()));
 //...
 baseAdapter.setListAndNotifyDataSetChanged(list);
+```
+
+### ViewPager、RecyclerView、ViewPager2高度自适应第一个child
+```
+<androidx.viewpager2.widget.ViewPager2
+    android:id="@+id/vp_pager"
+    android:layout_width="match_parent"
+    android:layout_height="1dp"/>//随便写一个高
+
+//初始化时即可调用（如果child高度因数据再次变化，这里不会更新，请在合适时机再次调用，后续可能会进行优化）
+ViewGroupWrapUtils.wrap(vp, false);
 ```
 
 ## 使用小贴士
