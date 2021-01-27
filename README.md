@@ -158,7 +158,6 @@ public MyAdapter() {
 @Override
 public BaseViewHolder<ViewDataBinding> onCreateListViewHolder(@NonNull ViewGroup parent) {
     TextView tv = new AppCompatTextView(parent.getContext());
-    tv.setTag(R.id.tag_view_no_data_binding, "");
     return new BaseViewHolder<>(tv);
 }
 ```
