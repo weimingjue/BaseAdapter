@@ -241,6 +241,10 @@ ViewGroupWrapUtils.wrap(vp, false);
 
 有header、footer调用notifyItem...时请注意+1（Adapter的通病，无解决方案）
 
+关于增加多个header、footer：个人认为多个header、footer场景少并且双方都难以管理，所以用到时请自己写个LinearLayout
+
+关于空状态：个人认为这不在adapter范畴（对上拉下拉、notifyItem都不太友好），自行写个空状态工具类反而更方便（很简单，如有需要后续开放）
+
 ## 导入方式
 你的build.gradle要有jitpack.io，大致如下
 ```
@@ -254,7 +258,7 @@ allprojects {
 }
 ```
 然后：
-`（api或）implementation 'com.github.weimingjue:BaseAdapter:4.2.0'`
+`（api或）implementation 'com.github.weimingjue:BaseAdapter:4.2.1'`
 
 不需要layoutId的混淆要求：
 ```

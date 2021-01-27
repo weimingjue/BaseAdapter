@@ -104,7 +104,7 @@ public abstract class BaseAdapterLvsList<DB extends ViewDataBinding, BEAN> exten
     }
 
     /**
-     * @param view null表示删除
+     * @param view null表示删除，view的parent为FrameLayout，默认match、wrap
      */
     public void setHeaderView(@Nullable View view) {
         mHelper.setHeaderView(view);
@@ -117,7 +117,7 @@ public abstract class BaseAdapterLvsList<DB extends ViewDataBinding, BEAN> exten
     }
 
     /**
-     * @param view null表示删除
+     * @param view null表示删除，view的parent为FrameLayout，默认match、wrap
      */
     @Override
     public void setFooterView(@Nullable View view) {
