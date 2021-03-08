@@ -131,14 +131,14 @@ public abstract class BaseAdapterRvList<DB extends ViewDataBinding, BEAN> extend
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * 就资源id，使用dataBinding绑定数据
+     * 就资源id
      */
     public static <BEAN> BaseAdapterRvList<?, BEAN> createAdapter(@LayoutRes final int layoutId) {
-        return createAdapter(null, layoutId);
+        return createAdapter(null, layoutId, null);
     }
 
     /**
-     * 就资源id，使用dataBinding绑定数据
+     * list+资源id
      */
     public static <BEAN> BaseAdapterRvList<?, BEAN> createAdapter(@Nullable List<BEAN> list, @LayoutRes final int layoutId) {
         return createAdapter(list, layoutId, null);
@@ -146,6 +146,14 @@ public abstract class BaseAdapterRvList<DB extends ViewDataBinding, BEAN> extend
 
     /**
      * 资源id+回调
+     */
+    public static <DB extends ViewDataBinding, BEAN> BaseAdapterRvList<DB, BEAN> createAdapter(
+            @LayoutRes final int layoutId, @Nullable final OnAdapterBindListener<DB, BEAN> listener) {
+        return createAdapter(null, layoutId, listener);
+    }
+
+    /**
+     * list+资源id+回调
      *
      * @param layoutId 资源id，必须有
      */
@@ -158,7 +166,7 @@ public abstract class BaseAdapterRvList<DB extends ViewDataBinding, BEAN> extend
             public BaseViewHolder<DB> onCreateListViewHolder(@NonNull ViewGroup parent) {
                 BaseViewHolder<DB> holder = super.onCreateListViewHolder(parent);
                 if (listener != null) {
-                    listener.onViewHolderCreated(holder);
+                    listener.onViewHolderCreated(this, holder);
                 }
                 return holder;
             }
@@ -166,7 +174,7 @@ public abstract class BaseAdapterRvList<DB extends ViewDataBinding, BEAN> extend
             @Override
             public void onBindListViewHolder(@NonNull BaseViewHolder<DB> holder, int listPosition, BEAN bean) {
                 if (listener != null) {
-                    listener.onBindViewHolder(holder, listPosition, bean);
+                    listener.onBindViewHolder(this, holder, listPosition, bean);
                 }
             }
         };
@@ -177,9 +185,9 @@ public abstract class BaseAdapterRvList<DB extends ViewDataBinding, BEAN> extend
         /**
          * 当viewHolder创建完成后
          */
-        default void onViewHolderCreated(BaseViewHolder<DB> holder) {
+        default void onViewHolderCreated(BaseAdapterRvList<DB, BEANS> adapter, BaseViewHolder<DB> holder) {
         }
 
-        void onBindViewHolder(BaseViewHolder<DB> holder, int listPosition, BEANS bean);
+        void onBindViewHolder(BaseAdapterRvList<DB, BEANS> adapter, BaseViewHolder<DB> holder, int listPosition, BEANS bean);
     }
 }

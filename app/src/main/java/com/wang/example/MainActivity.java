@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         //直接create，逻辑较少推荐使用
 //        BaseAdapterRvList<?, String> adapter = BaseAdapterRvList.createAdapter(R.layout.adapter_main_list);
 //        BaseAdapterRvList<AdapterMainListBinding, String> adapter = BaseAdapterRvList.createAdapter(null, R.layout.adapter_main_list,
-//                (holder, listPosition, s) -> {
+//                (adapter1, holder, listPosition, s) -> {
 //                    if (s.contains("10")) {
 //                        holder.itemView.setBackgroundColor(0xff999999);
 //                    }
