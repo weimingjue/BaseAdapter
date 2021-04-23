@@ -31,7 +31,7 @@ public class ListAdapterHelper<DB extends ViewDataBinding, BEAN> extends BaseLis
     }//该变量只能传入上面几种,否则会报错
 
     @LayoutRes
-    public int mLayoutId;
+    public final int mLayoutId;
 
     public ListAdapterHelper(IListAdapter adapter, @LayoutRes int layoutId, @Nullable List<BEAN> list) {
         super(adapter, list);
@@ -106,7 +106,7 @@ public class ListAdapterHelper<DB extends ViewDataBinding, BEAN> extends BaseLis
     @NonNull
     public BaseViewHolder<DB> onCreateDefaultViewHolder(@NonNull ViewGroup parent, Class baseClass, Class childClass) {
         if (mLayoutId == 0) {
-            mLayoutId = GenericUtils.getGenericRes(parent.getContext(), baseClass, childClass);
+            return new BaseViewHolder<>(GenericUtils.getGenericView(parent.getContext(), baseClass, childClass, parent));
         }
         return new BaseViewHolder<>(parent, mLayoutId);
     }

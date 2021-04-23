@@ -145,8 +145,6 @@ adapter.setOnItemClickListener(new OnItemItemClickListener() {
     //...footer、longClick等都有
 });
 ```
-### 特殊情况
-如果真的不想加混淆，则adapter的构造里传入layoutRes即可
 ```
 public MyAdapter() {
     super(R.layout.adapter_main_list, null);
@@ -257,11 +255,8 @@ allprojects {
 }
 ```
 然后：
-`（api或）implementation 'com.github.weimingjue:BaseAdapter:4.2.1'`
+`（api或）implementation 'com.github.weimingjue:BaseAdapter:4.3.0'`
 
-不需要layoutId的混淆要求：
-```
-# 框架特殊要求
-# 根据泛型获取res资源需要
--keep class * extends androidx.databinding.ViewDataBinding
-```
+混淆要求：
+加 -keep class * extends androidx.databinding.ViewDataBinding 可能会快一点
+不加也没啥影响
