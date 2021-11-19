@@ -21,7 +21,10 @@ import java.util.List;
  * 限制条件：
  * 1.所有的adapter的type必须在{@link #mTypeMax}{@link #mTypeMin}之间
  * 2.目前只支持{@link #notifyDataSetChanged}，动画等效果暂不支持
+ *
+ * @deprecated rv已经出了新的{@link ConcatAdapter}，用法基本完全一致并且支持更多
  */
+@Deprecated
 public final class BaseSuperAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     public final String TAG = getClass().getSimpleName();
     protected ArrayList<ISuperAdapter> mItemAdapters = new ArrayList<>();
