@@ -12,7 +12,7 @@
         <!--        adapter默认会设置adapter自己-->
         <variable
             name="adapter"
-            type="com.wang.adapters.adapter.BaseAdapterRvMultipleList" />
+            type="com.wang.adapters.adapter.BaseAdapterMultipleList" />
     </data>
 
     <LinearLayout

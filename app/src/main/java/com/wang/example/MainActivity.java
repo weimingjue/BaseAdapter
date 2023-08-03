@@ -12,12 +12,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
-import androidx.databinding.ViewDataBinding;
+import androidx.databinding.ViewBinding;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.wang.adapters.adapter.BaseAdapterRvList;
+import com.wang.adapters.adapter.BaseAdapterList;
 import com.wang.adapters.interfaces.OnItemItemClickListener;
 import com.wang.container.holder.BaseViewHolder;
 import com.wang.example.databinding.AdapterMainListBinding;
@@ -56,8 +56,8 @@ public class MainActivity extends AppCompatActivity {
             list.add(tb);
         }
         //直接create，逻辑较少推荐使用
-//        BaseAdapterRvList<?, String> adapter = BaseAdapterRvList.createAdapter(R.layout.adapter_main_list);
-//        BaseAdapterRvList<AdapterMainListBinding, String> adapter = BaseAdapterRvList.createAdapter(null, R.layout.adapter_main_list,
+//        BaseAdapterList<?, String> adapter = BaseAdapterList.createAdapter(R.layout.adapter_main_list);
+//        BaseAdapterList<AdapterMainListBinding, String> adapter = BaseAdapterList.createAdapter(null, R.layout.adapter_main_list,
 //                (adapter1, holder, listPosition, s) -> {
 //                    if (s.contains("10")) {
 //                        holder.itemView.setBackgroundColor(0xff999999);
@@ -66,15 +66,15 @@ public class MainActivity extends AppCompatActivity {
         //自定义方案
         ListAdapter adapter = new ListAdapter();
         //多条目
-//        BaseAdapterRvMultipleList<TestBean> adapter = new BaseAdapterRvMultipleList<>();
-//        adapter.addMultipleItem(R.layout.adapter_main_multiple_0, new BaseAdapterRvMultipleList.OnMultipleListListener<AdapterMainMultiple0Binding, TestBean>() {
+//        BaseAdapterMultipleList<TestBean> adapter = new BaseAdapterMultipleList<>();
+//        adapter.addMultipleItem(R.layout.adapter_main_multiple_0, new BaseAdapterMultipleList.OnMultipleListListener<AdapterMainMultiple0Binding, TestBean>() {
 //            @Override
-//            public boolean isThisType(@NonNull BaseAdapterRvMultipleList<TestBean> adapter, int listPosition, @NonNull TestBean bean) {
+//            public boolean isThisType(@NonNull BaseAdapterMultipleList<TestBean> adapter, int listPosition, @NonNull TestBean bean) {
 //                return listPosition % 2 == 0;
 //            }
 //
 //            @Override
-//            public void onBindListViewHolder(@NonNull BaseAdapterRvMultipleList<TestBean> adapter, @NonNull BaseViewHolder<AdapterMainMultiple0Binding> holder, int listPosition, @NonNull TestBean bean) {
+//            public void onBindListViewHolder(@NonNull BaseAdapterMultipleList<TestBean> adapter, @NonNull BaseViewHolder<AdapterMainMultiple0Binding> holder, int listPosition, @NonNull TestBean bean) {
 //                holder.getBinding().tvHhh.setTextColor(0xff00ff00);
 //            }
 //        }).addMultipleItem(R.layout.adapter_main_multiple_1, (adapter1, listPosition, bean) -> listPosition % 2 != 0);
@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
         adapter.setFooterView(iv);
     }
 
-    public static class ListAdapter extends BaseAdapterRvList<AdapterMainListBinding, TestBean> {
+    public static class ListAdapter extends BaseAdapterList<AdapterMainListBinding, TestBean> {
 
         @Override
         public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, TestBean bean) {
@@ -205,17 +205,17 @@ public class MainActivity extends AppCompatActivity {
             return holder;
         }
 
-        private static class MyAdapter extends BaseAdapterRvList<ViewDataBinding, String> {
+        private static class MyAdapter extends BaseAdapterList<ViewBinding, String> {
 
             @Override
-            public void onBindListViewHolder(@NonNull BaseViewHolder<ViewDataBinding> holder, int listPosition, String bean) {
+            public void onBindListViewHolder(@NonNull BaseViewHolder<ViewBinding> holder, int listPosition, String bean) {
                 TextView tv = (TextView) holder.itemView;
                 tv.setText(bean);
             }
 
             @NonNull
             @Override
-            public BaseViewHolder<ViewDataBinding> onCreateListViewHolder(@NonNull ViewGroup parent) {
+            public BaseViewHolder<ViewBinding> onCreateListViewHolder(@NonNull ViewGroup parent) {
                 TextView tv = new AppCompatTextView(parent.getContext());
                 tv.setTextColor(0xffff00ff);
                 tv.setTextSize(15);

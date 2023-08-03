@@ -154,7 +154,7 @@ public MyAdapter() {
 ```
 @NonNull
 @Override
-public BaseViewHolder<ViewDataBinding> onCreateListViewHolder(@NonNull ViewGroup parent) {
+public BaseViewHolder<ViewBinding> onCreateListViewHolder(@NonNull ViewGroup parent) {
     TextView tv = new AppCompatTextView(parent.getContext());
     return new BaseViewHolder<>(tv);
 }
@@ -258,5 +258,5 @@ allprojects {
 `（api或）implementation 'com.github.weimingjue:BaseAdapter:4.3.0'`
 
 混淆要求：
-加 -keep class * extends androidx.databinding.ViewDataBinding 可能会快一点
+加 -keep class * extends androidx.databinding.ViewBinding 可能会快一点
 不加也没啥影响
