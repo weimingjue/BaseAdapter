@@ -4,10 +4,12 @@ import android.view.ViewGroup
 import androidx.annotation.IntDef
 import androidx.annotation.LayoutRes
 import androidx.viewbinding.ViewBinding
+import com.sea.base.adapter.BaseViewHolder
+import com.sea.base.ext.view.inflater
+import com.sea.base.ext.view.layoutInflater
+import com.sea.base.utils.ViewBindingHelper
 import com.wang.container.helper.BaseListAdapterHelper
-import com.wang.container.holder.BaseViewHolder
 import com.wang.container.interfaces.IListAdapter
-import com.wang.container.utils.GenericUtils
 
 /**
  * 适用于简单list样式的公共代码
@@ -19,7 +21,7 @@ class ListAdapterHelper<VB : ViewBinding, BEAN>(
     list: List<BEAN>?
 ) : BaseListAdapterHelper<BEAN>(adapter, list) {
     @IntDef(TYPE_BODY, TYPE_HEADER, TYPE_FOOTER)
-    @kotlin.annotation.Retention(AnnotationRetention.SOURCE)
+    @Retention(AnnotationRetention.SOURCE)
     annotation class AdapterListType  //该变量只能传入上面几种,否则会报错
 
     fun onCreateViewHolder(parent: ViewGroup, @AdapterListType viewType: Int): BaseViewHolder<*> {
@@ -75,18 +77,14 @@ class ListAdapterHelper<VB : ViewBinding, BEAN>(
 
     fun onCreateDefaultViewHolder(
         parent: ViewGroup,
-        childClass: Class<*>
+        obj: Any
     ): BaseViewHolder<VB> {
-        return if (mLayoutId == 0) {
+        return if (mLayoutId == 0)
             BaseViewHolder(
-                GenericUtils.getGenericVB(
-                    parent.context,
-                    IListAdapter::class.java,
-                    childClass,
-                    parent
-                ) as VB
+                ViewBindingHelper.getViewBindingInstance<VB>(obj, parent.layoutInflater, parent)
             )
-        } else BaseViewHolder(parent, mLayoutId)
+        else
+            BaseViewHolder(parent.inflater(mLayoutId))
     }
 
     companion object {

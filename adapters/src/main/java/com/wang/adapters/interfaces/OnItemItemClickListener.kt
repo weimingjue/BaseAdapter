@@ -3,113 +3,108 @@ package com.wang.adapters.interfaces
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.CallSuper
-import androidx.annotation.IntDef
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
-import com.wang.adapters.R
+import com.google.android.flexbox.FlexboxLayout
+import com.sea.base.adapter.BaseViewHolder
+import com.sea.base.ext.view.adapterLayoutPosition
+import com.sea.im.base.R
 import com.wang.adapters.adapter.BaseAdapter
-import com.wang.container.holder.BaseViewHolder
 import com.wang.container.interfaces.IAdapter
-import com.zhy.view.flowlayout.FlowLayout
-import java.lang.annotation.Retention
-import java.lang.annotation.RetentionPolicy
 
 /**
  * 高级功能:adapter套adapter的点击事件,具体用法见实现类
  * 方法回调见onParent...和onChild...，其他方法不要重写
  *
- *
  * create时请设置好adapter和layoutManager
- * bind里写法[BaseAdapter.setItemRvData]
  */
-interface OnItemItemClickListener : OnItemClickListener {
-    @IntDef(ITEM_CLICK, ITEM_LONG_CLICK, ITEM_HEADER_CLICK, ITEM_HEADER_LONG_CLICK, ITEM_FOOTER_CLICK, ITEM_FOOTER_LONG_CLICK)
-    @Retention(RetentionPolicy.SOURCE)
-    annotation class ClickType  //该变量只能传入上面几种,否则会报错
+open class OnItemItemClickListener : OnItemClickListener() {
 
     @CallSuper //一般不需要重写，所以加了此限制（如果真的不想调用super可以注解抑制掉错误）
     override fun onItemClick(view: View, listPosition: Int) {
-        performClick(view, ITEM_CLICK, listPosition)
+        checkParentInfo(
+            view,
+            noP = {
+                onParentItemClick(view, listPosition)
+            },
+            hasP = { parentListPosition ->
+                onChildItemClick(view, parentListPosition, listPosition)
+            })
     }
 
     @CallSuper
     override fun onItemLongClick(view: View, listPosition: Int): Boolean {
-        return performClick(view, ITEM_LONG_CLICK, listPosition)
+        checkParentInfo(
+            view,
+            noP = {
+                return onParentItemLongClick(view, listPosition)
+            },
+            hasP = { parentListPosition ->
+                return onChildItemLongClick(view, parentListPosition, listPosition)
+            })
+        return false
     }
 
     @CallSuper
     override fun onHeaderClick(view: View) {
-        performClick(view, ITEM_HEADER_CLICK, 0)
+        checkParentInfo(
+            view,
+            noP = {
+                onParentHeaderClick(view)
+            },
+            hasP = { parentListPosition ->
+                onChildHeaderClick(view, parentListPosition)
+            })
     }
 
     @CallSuper
     override fun onHeaderLongClick(view: View): Boolean {
-        return performClick(view, ITEM_HEADER_LONG_CLICK, 0)
+        checkParentInfo(
+            view,
+            noP = {
+                return onParentHeaderLongClick(view)
+            },
+            hasP = { parentListPosition ->
+                return onChildHeaderLongClick(view, parentListPosition)
+            })
+        return false
     }
 
     @CallSuper
     override fun onFooterClick(view: View) {
-        performClick(view, ITEM_FOOTER_CLICK, 0)
+        checkParentInfo(
+            view,
+            noP = {
+                onParentFooterClick(view)
+            },
+            hasP = { parentListPosition ->
+                onChildFooterClick(view, parentListPosition)
+            })
     }
 
     @CallSuper
     override fun onFooterLongClick(view: View): Boolean {
-        return performClick(view, ITEM_FOOTER_LONG_CLICK, 0)
+        checkParentInfo(
+            view,
+            noP = {
+                return onParentFooterLongClick(view)
+            },
+            hasP = { parentListPosition ->
+                return onChildFooterLongClick(view, parentListPosition)
+            })
+        return false
     }
 
-    /**
-     * 总的点击分发
-     */
-    @CallSuper
-    fun performClick(view: View, @ClickType clickType: Int, listPosition: Int): Boolean {
+    private inline fun checkParentInfo(view: View, noP: () -> Unit, hasP: (parentListPosition: Int) -> Unit) {
         val parentAdapter = getParentAdapter(view)
-        return if (parentAdapter == null) {
-            when (clickType) {
-                ITEM_CLICK -> {
-                    onParentItemClick(view, listPosition)
-                    true
-                }
-
-                ITEM_LONG_CLICK -> onParentItemLongClick(view, listPosition)
-                ITEM_HEADER_CLICK -> {
-                    onParentHeaderClick(view)
-                    true
-                }
-
-                ITEM_HEADER_LONG_CLICK -> onParentHeaderLongClick(view)
-                ITEM_FOOTER_CLICK -> {
-                    onParentFooterClick(view)
-                    true
-                }
-
-                ITEM_FOOTER_LONG_CLICK -> onParentFooterLongClick(view)
-                else -> false
-            }
+        if (parentAdapter == null) {
+            noP.invoke()
         } else {
-            val parentPosition = getParentViewHolder(view).commonPosition
-            val formatParentPosition = getFormatPosition(parentAdapter, parentPosition)
-            when (formatParentPosition) {
-                OnItemClickListener.Companion.POSITION_HEADER, OnItemClickListener.Companion.POSITION_FOOTER -> false //item点击，暂不支持header、footer里的RecyclerView
-                else -> when (clickType) {
-                    ITEM_CLICK -> {
-                        onChildItemClick(view, formatParentPosition, listPosition)
-                        true
-                    }
-
-                    ITEM_LONG_CLICK -> onChildItemLongClick(view, formatParentPosition, listPosition)
-                    ITEM_HEADER_CLICK -> {
-                        onChildHeaderClick(view, formatParentPosition)
-                        true
-                    }
-
-                    ITEM_HEADER_LONG_CLICK -> onChildHeaderLongClick(view, formatParentPosition)
-                    ITEM_FOOTER_CLICK -> {
-                        onChildFooterClick(view, formatParentPosition)
-                        true
-                    }
-
-                    ITEM_FOOTER_LONG_CLICK -> onChildFooterLongClick(view, formatParentPosition)
-                    else -> false
+            val parentPosition = getParentViewHolder(view)?.adapterLayoutPosition ?: -1
+            when (val formatParentPosition = getFormatPosition(parentAdapter, parentPosition)) {
+                POSITION_HEADER, POSITION_FOOTER -> return //item点击，暂不支持header、footer里的RecyclerView
+                else -> {
+                    hasP.invoke(formatParentPosition)
                 }
             }
         }
@@ -118,16 +113,15 @@ interface OnItemItemClickListener : OnItemClickListener {
     /**
      * 外层的position需要遍历
      */
-    @CallSuper
-    fun getParentAdapter(view: View): IAdapter<*>? {
+    private fun getParentAdapter(view: View): IAdapter<*>? {
         var parent = view.parent as? ViewGroup
         while (parent != null) {
             //第二层不建议使用ListView或GridView(肯定没有复用性,并且效率很差,可以尝试使用RecyclerView然后wrap)
 //            if (parent instanceof RecyclerView || parent instanceof ViewPager || parent instanceof FlowLayout || parent instanceof AdapterView) {
-            if (parent is RecyclerView || parent is ViewPager || parent is FlowLayout) {
+            if (parent is RecyclerView || parent is ViewPager || parent is FlexboxLayout) {
                 return parent.getTag(R.id.tag_view_adapter) as IAdapter<*>
             }
-            parent = parent.parent
+            parent = parent.parent as? ViewGroup
         }
         //没取到返回null
         return null
@@ -136,85 +130,71 @@ interface OnItemItemClickListener : OnItemClickListener {
     /**
      * 获取当前view所在的ViewHolder
      */
-    @CallSuper
-    fun getParentViewHolder(view: View): BaseViewHolder<*>? {
+    private fun getParentViewHolder(view: View): BaseViewHolder<*>? {
         var parent = view.parent as? ViewGroup
         while (parent != null) {
             //第二层不建议使用ListView或GridView(肯定没有复用性,并且效率很差,可以尝试使用RecyclerView然后wrap)
 //            if (parent instanceof RecyclerView || parent instanceof ViewPager || parent instanceof FlowLayout || parent instanceof AdapterView) {
-            if (parent is RecyclerView || parent is ViewPager || parent is FlowLayout) {
+            if (parent is RecyclerView || parent is ViewPager || parent is FlexboxLayout) {
                 return parent.getTag(R.id.tag_view_holder) as BaseViewHolder<*>
             }
-            parent = parent.parent
+            parent = parent.parent as? ViewGroup
         }
         //没取到返回null
         return null
     }
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // 以下是parent的回调
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /**
-     * 当外层被点击时
-     *
-     * @param parentPosition 外层adapter的position
-     */
-    fun onParentItemClick(view: View, parentPosition: Int)
 
-    /**
-     * 当外层被长按时
-     *
-     * @param parentPosition 外层adapter的position
-     */
-    fun onParentItemLongClick(view: View, parentPosition: Int): Boolean {
-        return false
+    open fun onParentItemClick(view: View, parentListPosition: Int) {
+        onItemClick?.invoke(getAdapter(view), view, parentListPosition, getViewHolder(view))
     }
 
-    fun onParentHeaderClick(view: View) {}
-    fun onParentHeaderLongClick(view: View): Boolean {
-        return false
+    open fun onParentItemLongClick(view: View, parentListPosition: Int): Boolean {
+        return onItemLongClick?.invoke(getAdapter(view), view, parentListPosition, getViewHolder(view)) ?: false
     }
 
-    fun onParentFooterClick(view: View) {}
-    fun onParentFooterLongClick(view: View): Boolean {
-        return false
-    }
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // 以下是child的回调
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /**
-     * 当内层被点击时
-     *
-     * @param parentPosition 外层adapter对应的position
-     * @param childPosition  内层adapter对应的position
-     */
-    fun onChildItemClick(view: View, parentPosition: Int, childPosition: Int)
-
-    /**
-     * 当内层被长按时
-     *
-     * @param parentPosition 外层adapter对应的position
-     * @param childPosition  内层adapter对应的position
-     */
-    fun onChildItemLongClick(view: View, parentPosition: Int, childPosition: Int): Boolean {
-        return false
+    open fun onParentHeaderClick(view: View) {
+        onHeaderClick?.invoke(getAdapter(view), view)
     }
 
-    fun onChildHeaderClick(view: View, parentPosition: Int) {}
-    fun onChildHeaderLongClick(view: View, parentPosition: Int): Boolean {
-        return false
+    open fun onParentHeaderLongClick(view: View): Boolean {
+        return onHeaderLongClick?.invoke(getAdapter(view), view) ?: false
     }
 
-    fun onChildFooterClick(view: View, parentPosition: Int) {}
-    fun onChildFooterLongClick(view: View, parentPosition: Int): Boolean {
-        return false
+    open fun onParentFooterClick(view: View) {
+        onFooterClick?.invoke(getAdapter(view), view)
     }
 
-    companion object {
-        const val ITEM_CLICK = 0
-        const val ITEM_LONG_CLICK = 1
-        const val ITEM_HEADER_CLICK = 2
-        const val ITEM_HEADER_LONG_CLICK = 3
-        const val ITEM_FOOTER_CLICK = 4
-        const val ITEM_FOOTER_LONG_CLICK = 5
+    open fun onParentFooterLongClick(view: View): Boolean {
+        return onFooterLongClick?.invoke(getAdapter(view), view) ?: false
+    }
+
+    var onChildItemClick: ((adapter: BaseAdapter, view: View, parentListPosition: Int, childListPosition: Int, vh: BaseViewHolder<*>) -> Unit)? = null
+    open fun onChildItemClick(view: View, parentListPosition: Int, childListPosition: Int) {
+        onChildItemClick?.invoke(getAdapter(view), view, parentListPosition, childListPosition, getViewHolder(view))
+    }
+
+    var onChildItemLongClick: ((adapter: BaseAdapter, view: View, parentListPosition: Int, childListPosition: Int, vh: BaseViewHolder<*>) -> Boolean)? = null
+    open fun onChildItemLongClick(view: View, parentListPosition: Int, childListPosition: Int): Boolean {
+        return onChildItemLongClick?.invoke(getAdapter(view), view, parentListPosition, childListPosition, getViewHolder(view)) ?: false
+    }
+
+    var onChildHeaderClick: ((adapter: BaseAdapter, view: View, parentListPosition: Int) -> Unit)? = null
+    open fun onChildHeaderClick(view: View, parentListPosition: Int) {
+        onChildHeaderClick?.invoke(getAdapter(view), view, parentListPosition)
+    }
+
+    var onChildHeaderLongClick: ((adapter: BaseAdapter, view: View, parentListPosition: Int) -> Boolean)? = null
+    open fun onChildHeaderLongClick(view: View, parentListPosition: Int): Boolean {
+        return onChildHeaderLongClick?.invoke(getAdapter(view), view, parentListPosition) ?: false
+    }
+
+    var onChildFooterClick: ((adapter: BaseAdapter, view: View, parentListPosition: Int) -> Unit)? = null
+    open fun onChildFooterClick(view: View, parentListPosition: Int) {
+        onChildFooterClick?.invoke(getAdapter(view), view, parentListPosition)
+    }
+
+    var onChildFooterLongClick: ((adapter: BaseAdapter, view: View, parentListPosition: Int) -> Boolean)? = null
+    open fun onChildFooterLongClick(view: View, parentListPosition: Int): Boolean {
+        return onChildFooterLongClick?.invoke(getAdapter(view), view, parentListPosition) ?: false
     }
 }

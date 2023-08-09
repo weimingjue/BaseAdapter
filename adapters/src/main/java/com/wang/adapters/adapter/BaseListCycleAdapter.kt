@@ -4,16 +4,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.viewbinding.ViewBinding
+import com.sea.base.adapter.BaseViewHolder
 import com.wang.adapters.helper.ListAdapterHelper
 import com.wang.adapters.interfaces.OnItemClickListener
-import com.wang.adapters.utils.ArrayUtils
-import com.wang.container.holder.BaseViewHolder
 import com.wang.container.interfaces.IListAdapter
 
 /**
  * 无限循环滑动的adapter
  */
-abstract class BaseAdapterListCycle<DB : ViewBinding, BEAN>(
+abstract class BaseListCycleAdapter<DB : ViewBinding, BEAN>(
     @LayoutRes layoutId: Int,
     list: List<BEAN>?
 ) : BaseAdapter(), IListAdapter<BEAN, DB, OnItemClickListener> {
@@ -28,12 +27,12 @@ abstract class BaseAdapterListCycle<DB : ViewBinding, BEAN>(
      * 1.什么都不做，根据泛型自动获取，但Proguard不能混淆[ViewBinding]的子类
      * 2.覆盖[.onCreateViewHolder2]，自己自定义即可
      */
-    @kotlin.jvm.JvmOverloads
+    @JvmOverloads
     constructor(list: List<BEAN>? = null) : this(0, list) {
     }
 
     override fun getItemCount(): Int {
-        if (ArrayUtils.isEmpty(list)) {
+        if (list.isEmpty()) {
             return 0
         }
         return if (isCycle) Int.MAX_VALUE else listSize()
@@ -87,11 +86,7 @@ abstract class BaseAdapterListCycle<DB : ViewBinding, BEAN>(
      * 你也可以重写来添加自己的默认逻辑，如：全局隐藏显示、嵌套rv的默认属性设置等
      */
     override fun onCreateListViewHolder(parent: ViewGroup): BaseViewHolder<DB> {
-        return mHelper.onCreateDefaultViewHolder(
-            parent,
-            BaseAdapterListCycle::class.java,
-            javaClass
-        )
+        return mHelper.onCreateDefaultViewHolder(parent, this)
     }
 
     /**

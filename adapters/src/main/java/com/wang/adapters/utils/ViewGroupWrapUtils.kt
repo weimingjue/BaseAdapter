@@ -2,6 +2,7 @@ package com.wang.adapters.utils
 
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.get
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
@@ -10,19 +11,18 @@ object ViewGroupWrapUtils {
     /**
      * 获得child的宽高
      */
-    fun getChildWidthHeight(vg: ViewGroup, listener: OnChildWidthHeightResultListener) {
+    fun getChildWidthHeight(vg: ViewGroup, listener: (width: Int, height: Int) -> Unit) {
         vg.post {
-            if (vg.childCount > 0 && (vg.getChildAt(0).width > 0 || vg.getChildAt(0).height > 0)) {
-                val childAt = vg.getChildAt(0)
-                listener.onResult(childAt.width, childAt.height)
+            if (vg.childCount > 0 && (vg[0].width > 0 || vg[0].height > 0)) {
+                listener.invoke(vg[0].width, vg[0].height)
             } else {
                 vg.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
-                    override fun onLayoutChange(v: View, left: Int, top: Int, right: Int, bottom: Int, oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int) {
+                    override fun onLayoutChange(view: View, left: Int, top: Int, right: Int, bottom: Int, oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int) {
                         if (vg.childCount > 0) {
-                            val childAt = vg.getChildAt(0)
+                            val childAt = vg[0]
                             if (childAt.width > 0 || childAt.height > 0) {
                                 vg.removeOnLayoutChangeListener(this)
-                                listener.onResult(childAt.width, childAt.height)
+                                listener.invoke(childAt.width, childAt.height)
                             }
                         }
                     }
@@ -39,13 +39,13 @@ object ViewGroupWrapUtils {
     fun wrap(rv: RecyclerView, isWidth: Boolean) {
         rv.post {
             if (rv.childCount > 0) {
-                setMeasureSize(rv, rv.getChildAt(0), isWidth)
+                setMeasureSize(rv, rv[0], isWidth)
             } else {
                 rv.addOnChildAttachStateChangeListener(object : RecyclerView.OnChildAttachStateChangeListener {
                     override fun onChildViewAttachedToWindow(view: View) {
                         if (rv.childCount > 0) {
                             rv.removeOnChildAttachStateChangeListener(this)
-                            setMeasureSize(rv, rv.getChildAt(0), isWidth)
+                            setMeasureSize(rv, rv[0], isWidth)
                         }
                     }
 
@@ -63,13 +63,13 @@ object ViewGroupWrapUtils {
     fun wrap(vp: ViewPager, isWidth: Boolean) {
         vp.post {
             if (vp.childCount > 0) {
-                setMeasureSize(vp, vp.getChildAt(0), isWidth)
+                setMeasureSize(vp, vp[0], isWidth)
             } else {
                 vp.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
                     override fun onLayoutChange(v: View, left: Int, top: Int, right: Int, bottom: Int, oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int) {
                         if (vp.childCount > 0) {
                             vp.removeOnLayoutChangeListener(this)
-                            setMeasureSize(vp, vp.getChildAt(0), isWidth)
+                            setMeasureSize(vp, vp[0], isWidth)
                         }
                     }
                 })
@@ -83,16 +83,16 @@ object ViewGroupWrapUtils {
      * @param isWidth 修改宽还是高
      */
     fun wrap(vp: ViewPager2, isWidth: Boolean) {
-        val rv = vp.getChildAt(0) as RecyclerView
+        val rv = vp[0] as RecyclerView
         rv.post {
             if (rv.childCount > 0) {
-                setMeasureSize(vp, rv.getChildAt(0), isWidth)
+                setMeasureSize(vp, rv[0], isWidth)
             } else {
                 rv.addOnChildAttachStateChangeListener(object : RecyclerView.OnChildAttachStateChangeListener {
                     override fun onChildViewAttachedToWindow(view: View) {
                         if (rv.childCount > 0) {
                             rv.removeOnChildAttachStateChangeListener(this)
-                            setMeasureSize(vp, rv.getChildAt(0), isWidth)
+                            setMeasureSize(vp, rv[0], isWidth)
                         }
                     }
 

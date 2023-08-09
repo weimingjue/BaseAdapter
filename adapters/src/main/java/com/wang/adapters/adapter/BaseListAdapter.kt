@@ -4,10 +4,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.viewbinding.ViewBinding
+import com.sea.base.adapter.BaseViewHolder
 import com.wang.adapters.helper.ListAdapterHelper
 import com.wang.adapters.helper.ListAdapterHelper.AdapterListType
 import com.wang.adapters.interfaces.OnItemClickListener
-import com.wang.container.holder.BaseViewHolder
 import com.wang.container.interfaces.IListAdapter
 
 /**
@@ -18,7 +18,7 @@ import com.wang.container.interfaces.IListAdapter
  *
  * 多条目见[BaseAdapterMultipleList]
  */
-abstract class BaseAdapterList<DB : ViewBinding, BEAN>(
+abstract class BaseListAdapter<DB : ViewBinding, BEAN>(
     @LayoutRes layoutId: Int,
     list: List<BEAN>? = null
 ) : BaseAdapter(), IListAdapter<BEAN, DB, OnItemClickListener> {
@@ -67,11 +67,7 @@ abstract class BaseAdapterList<DB : ViewBinding, BEAN>(
      * 你也可以重写来添加自己的默认逻辑，如：全局隐藏显示、嵌套rv的默认属性设置等
      */
     override fun onCreateListViewHolder(parent: ViewGroup): BaseViewHolder<DB> {
-        return listHelper.onCreateDefaultViewHolder(
-            parent,
-            BaseAdapterList::class.java,
-            javaClass
-        )
+        return listHelper.onCreateDefaultViewHolder(parent, this)
     }
 
     interface OnAdapterBindListener<DB : ViewBinding, BEANS> {
@@ -79,13 +75,13 @@ abstract class BaseAdapterList<DB : ViewBinding, BEAN>(
          * 当viewHolder创建完成后
          */
         fun onViewHolderCreated(
-            adapter: BaseAdapterList<DB, BEANS>?,
+            adapter: BaseListAdapter<DB, BEANS>?,
             holder: BaseViewHolder<DB>?
         ) {
         }
 
         fun onBindViewHolder(
-            adapter: BaseAdapterList<DB, BEANS>?,
+            adapter: BaseListAdapter<DB, BEANS>?,
             holder: BaseViewHolder<DB>?,
             listPosition: Int,
             bean: BEANS
@@ -119,8 +115,8 @@ abstract class BaseAdapterList<DB : ViewBinding, BEAN>(
             @LayoutRes layoutId: Int,
             list: List<BEAN>? = null,
             listener: OnAdapterBindListener<DB, BEAN>? = null
-        ): BaseAdapterList<DB, BEAN> {
-            return object : BaseAdapterList<DB, BEAN>(layoutId, list) {
+        ): BaseListAdapter<DB, BEAN> {
+            return object : BaseListAdapter<DB, BEAN>(layoutId, list) {
                 override fun onCreateListViewHolder(parent: ViewGroup): BaseViewHolder<DB> {
                     val holder = super.onCreateListViewHolder(parent)
                     listener?.onViewHolderCreated(this, holder)
