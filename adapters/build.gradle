@@ -31,8 +31,6 @@ dependencies {
     //谷歌更强大的浮动布局
     implementation 'com.google.android:flexbox:2.0.1'
 
-    //自己的适用于超复杂列表样式，如：聊天、首页等
-    api 'com.github.weimingjue:BaseContainerAdapter:0.9.3'
     implementation "androidx.core:core-ktx:1.10.1"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

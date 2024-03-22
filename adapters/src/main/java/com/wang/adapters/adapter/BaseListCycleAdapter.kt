@@ -1,35 +1,17 @@
 package com.wang.adapters.adapter
 
-import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.LayoutRes
 import androidx.viewbinding.ViewBinding
-import com.sea.base.adapter.BaseViewHolder
 import com.wang.adapters.helper.ListAdapterHelper
-import com.wang.adapters.interfaces.OnItemClickListener
-import com.wang.container.interfaces.IListAdapter
+import com.wang.adapters.holder.BaseViewHolder
+import com.wang.adapters.interfaces.IListAdapter
+import com.wang.adapters.utils.listPosition
 
 /**
  * 无限循环滑动的adapter
  */
-abstract class BaseListCycleAdapter<DB : ViewBinding, BEAN>(
-    @LayoutRes layoutId: Int,
-    list: List<BEAN>?
-) : BaseAdapter(), IListAdapter<BEAN, DB, OnItemClickListener> {
-    private val mHelper: ListAdapterHelper<DB, BEAN> = ListAdapterHelper(this, layoutId, list)
-    private var mIsCycle = true
-
-    /**
-     * 资源id已经不是必须的了
-     *
-     *
-     * 无资源id有2种解决方式（任选其一）：
-     * 1.什么都不做，根据泛型自动获取，但Proguard不能混淆[ViewBinding]的子类
-     * 2.覆盖[.onCreateViewHolder2]，自己自定义即可
-     */
-    @JvmOverloads
-    constructor(list: List<BEAN>? = null) : this(0, list) {
-    }
+abstract class BaseListCycleAdapter<VB : ViewBinding, BEAN : Any>(list: List<BEAN>?) : BaseAdapter(), IListAdapter<BEAN> {
+    private val mHelper = ListAdapterHelper(this, list)
 
     override fun getItemCount(): Int {
         if (list.isEmpty()) {
@@ -38,24 +20,11 @@ abstract class BaseListCycleAdapter<DB : ViewBinding, BEAN>(
         return if (isCycle) Int.MAX_VALUE else listSize()
     }
 
-    override fun onBindViewHolder2(holder: BaseViewHolder<*>, position: Int) {
-        //对position进行了%处理
-        var p2 = position % list.size
-        onBindListViewHolder(holder as BaseViewHolder<DB>, p2, list[p2])
+    override fun onBindViewHolder(holder: BaseViewHolder<*>, position: Int) {
+        onBindListViewHolder(holder as BaseViewHolder<VB>, list[position % list.size])
     }
 
-    /**
-     * 暂不支持header、footer
-     */
-    override var headerView: View?
-        get() = null
-        set(value) {}
-
-    override var footerView: View?
-        get() = null
-        set(value) {}
-
-    override fun onCreateViewHolder2(parent: ViewGroup, viewType: Int): BaseViewHolder<DB> {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<VB> {
         return onCreateListViewHolder(parent)
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -85,20 +54,27 @@ abstract class BaseListCycleAdapter<DB : ViewBinding, BEAN>(
      * 完全不需要的话覆盖整个方法就行了，不会出问题
      * 你也可以重写来添加自己的默认逻辑，如：全局隐藏显示、嵌套rv的默认属性设置等
      */
-    override fun onCreateListViewHolder(parent: ViewGroup): BaseViewHolder<DB> {
-        return mHelper.onCreateDefaultViewHolder(parent, this)
-    }
+    open fun onCreateListViewHolder(parent: ViewGroup) = mHelper.onCreateDefaultViewHolder<VB>(parent, this)
 
     /**
-     * @param isCycle true 默认值，可循环滑动
+     * 最终你的list的bind
+     * @param holder position见[cycleListPosition]
      */
-    var isCycle: Boolean
-        get() = mIsCycle
+    abstract fun onBindListViewHolder(holder: BaseViewHolder<VB>, bean: BEAN)
+
+    /**
+     * true 默认值，可循环滑动
+     */
+    var isCycle: Boolean = true
         set(isCycle) {
-            if (isCycle != mIsCycle) {
-                mIsCycle = isCycle
+            if (field != isCycle) {
+                field = isCycle
                 notifyDataSetChanged()
             }
         }
 
+    /**
+     * 对position进行取余
+     */
+    inline val BaseViewHolder<VB>.cycleListPosition get() = listPosition % list.size
 }

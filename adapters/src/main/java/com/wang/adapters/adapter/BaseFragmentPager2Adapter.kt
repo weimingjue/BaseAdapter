@@ -19,6 +19,9 @@ class BaseFragmentPager2Adapter(fm: FragmentManager, lifecycle: Lifecycle, varar
     constructor(act: AppCompatActivity, vararg frags: Fragment) :
             this(act.supportFragmentManager, act.lifecycle, *frags)
 
+//    constructor(ui: IUIContext, vararg frags: Fragment) :
+//            this(ui.currentFragmentManager, ui.lifecycle, *frags)
+
     var fragList = frags.toMutableList()
         set(value) {
             field.clear()

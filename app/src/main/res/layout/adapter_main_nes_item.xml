@@ -6,18 +6,12 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/tvText"
+        android:id="@+id/tvItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:textColor="#333"
         android:textSize="20sp"
         android:textStyle="bold"
-        tools:text="这是文本" />
-
-    <Button
-        android:id="@+id/btButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="按钮" />
+        tools:text="这是嵌套内层" />
 </LinearLayout>

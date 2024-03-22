@@ -1,0 +1,4 @@
+<resources>
+    <!--将vb对象存到自身的root里-->
+    <item name="tag_view_binding_obj" type="id" />
+</resources>

@@ -1,166 +1,55 @@
 # 代码非常简单，基于dataBinding
 
 ### 概览
+
 本项目主要做了RecyclerView adapter、ListView adapter、ViewPager adapter fragment的封装，旨在减少大量模板代码。
 
-也加了和这些相关连带问题的解决方法：adapter套RecyclerView回调繁琐、动态fragment刷新白屏、ViewPager的Transformer不能获取position、ViewPager ViewPager2高度不能wrap等问题的解决
+也加了和这些相关连带问题的解决方法：adapter套RecyclerView回调繁琐、动态fragment刷新白屏、ViewPager和ViewPager2高度不能wrap等问题的解决
+
+### 背景介绍
+
+Adapter属于View层，Activity也是View层，在当前各种新框架下两个几乎没有什么代码，然而它们之间交互起来特别繁琐，如果我们直接将Adapter合并到Activity里，会产生什么意想不到的结果呢？
 
 ### 详细介绍
-一个简单的listAdapter只需要如下一行（没看错，总共就一行）
-```
-   BaseAdapterRvList<?, String> adapter = BaseAdapterRvList.createAdapter(R.layout.adapter_main_list);
-```
-当然，你的xml是基于dataBinding的
-```
-<?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
+一个简单的listAdapter只需要如下一行（没看错，总共就一行），基于ViewBinding
 
-        <!--        adapter默认会设置并刷新“bean”这个属性-->
-        <variable
-            name="bean"
-            type="String" />
-    </data>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#fff"
-        android:padding="10dp"
-        android:text="@{bean}"
-        android:textColor="#333"
-        android:textSize="20sp"
-        tools:text="这是文本" />
-</layout>
 ```
-自带点击事件
-```
-adapter.setOnItemClickListener(new OnItemClickListener() {
-    @Override
-    public void onItemClick(@NonNull View view, int listPosition) {
+class MainActivity : AppCompatActivity() {
+    private val listAdapter by lazyNone {
+        createListVbAdapter<AdapterMainListBinding, String> { holder, vb, bean -> }
     }
+}
+```
 
-    @Override
-    public boolean onItemLongClick(@NonNull View view, int listPosition) {
-        return true;
-    }
+点击事件什么的都不需要额外操作，没有回调也没有额外传参，直接在Adapter写就行了
 
-    @Override
-    protected void onFooterClick(@NonNull View view) {
-        super.onFooterClick(view);
-    }
-    //...header、footer long click
-});
-//只有onItemClick也可以使用语法糖：
-adapter.setOnItemClickListener((view, listPosition) -> toast("你点击了：" + listPosition));
 ```
-自带header、footer
-```
-adapter.setHeaderView(context, R.layout.adapter_main_header);//根布局可以使用height、layout_margin、layout_gravity相关属性
-adapter.setFooterView(view);
-```
-当然你也可以自定义一些简单逻辑
-```
-BaseAdapterRvList<AdapterMainListBinding, String> adapter = BaseAdapterRvList.createAdapter(list, R.layout.adapter_main_list,
-        (holder, listPosition, s) -> {
-            if (s.contains("10")) {
-                holder.itemView.setBackgroundColor(0xff999999);
+class MainActivity : AppCompatActivity() {
+    private val listAdapter by lazyNone {
+        createListVbAdapter<AdapterMainListBinding, String> { holder, vb, bean ->
+            if (bean.contains("10")) {
+                holder.itemView.setBackgroundColor(0xff999999.toInt())
             }
-        });//回调还有onViewHolderCreated方法
-```
-也可以完全自定义（没看错，不需要layoutId）（适用于复杂逻辑，简单逻辑推荐使用上面方式）
-```
-public static class ListAdapter extends BaseAdapterRvList<AdapterMainListBinding, String> {
-
-    @Override
-    public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, String s) {
-        if (s.contains("100")) {
-            getList().set(listPosition, "改掉了100");//后面会调用刷新dataBinding
-            holder.getBinding().viewBackground.setBackgroundColor(0xff00ff00);
-        } else if (s.contains("10")) {
-            holder.getBinding().viewBackground.setBackgroundColor(0xff999999);
-        } else {
-            holder.getBinding().viewBackground.setBackgroundColor(0xffffffff);
+            vb.tvText.text = bean
+            vb.btButton.setOnFastClickListener {
+                toast("点击了Button")
+            }
+            holder.setOnFastClickListener {
+                toast("点击item了${holder.listPosition}")
+            }
+        }.apply {
+        //自带header、footer
+            headerView = AppCompatTextView(this@MainActivity).apply {
+                text = "这是header"
+            }
         }
     }
-
-    @NonNull
-    @Override
-    public BaseViewHolder<AdapterMainListBinding> onCreateListViewHolder(@NonNull ViewGroup parent) {
-        BaseViewHolder<AdapterMainListBinding> holder = super.onCreateListViewHolder(parent);
-        holder.itemView.setBackgroundColor(0xffeeeeee);
-        return holder;
-    }
-}
-```
-adapter里有个button，点完后还要写个回调给Activity？？？反正我是不喜欢：
-```
-public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, TestBean bean) {
-    setItemViewClick(holder.getBinding().btButton, holder);
-}
-...
-adapter.setOnItemClickListener(new OnItemClickListener() {
-    @Override
-    public void onItemClick(@NonNull View view, int listPosition) {
-        switch (view.getId()) {
-            case R.id.bt_button:
-                toast("没想到吧，还能这样玩：" + listPosition);
-                break;
-            default:
-                toast("你点击了整个条目：" + listPosition);
-                break;
-        }
-    }
-});
-```
-adapter里又套了一个RecyclerView，简直是回调地狱啊...完全受不了：
-```
-public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, TestBean bean) {
-    //需提前setAdapter、layoutManager（在bind或者每次create时）
-    setItemRvData(holder.getBinding().rvItemList, holder, bean.itemTextList);
-}
-...
-adapter.setOnItemClickListener(new OnItemItemClickListener() {
-    @Override
-    public void onParentItemClick(@NonNull View view, int parentPosition) {
-        toast("你点击了外层：" + parentPosition);
-    }
-
-    @Override
-    public void onChildItemClick(@NonNull View view, int parentPosition, int childPosition) {
-        toast("你点击了外层：" + parentPosition + "，内层：" + childPosition);
-    }
-
-    @Override
-    public void onParentHeaderClick(@NonNull View view) {
-        toast("你点击了外层：header");
-    }
-
-    @Override
-    public void onChildHeaderClick(@NonNull View view, int parentPosition) {
-        toast("你点击了外层：" + parentPosition + "，内层：header");
-    }
-    //...footer、longClick等都有
-});
-```
-```
-public MyAdapter() {
-    super(R.layout.adapter_main_list, null);
-}
-```
-如果真的不想使用dataBinding，则覆盖onCreateListViewHolder方法，不调用super即可
-```
-@NonNull
-@Override
-public BaseViewHolder<ViewBinding> onCreateListViewHolder(@NonNull ViewGroup parent) {
-    TextView tv = new AppCompatTextView(parent.getContext());
-    return new BaseViewHolder<>(tv);
 }
 ```
 
 ### ViewPager的Fragment更简单
+
 ```
 mVp.setAdapter(new BaseFragmentPagerAdapter(getSupportFragmentManager(), mFrags));
 //或
@@ -178,35 +67,70 @@ mVp.setAdapter(adapter);
 ...
 adapter.notifyAllItem(1);//保留展示的frag这样就不会白屏了，想要刷新这个frag当然需要自己frag内部刷新了，详见app下的示例
 ```
-PageTransformer不能获得view的position？手动写TAG+重写getItemPosition（这个方法的意义不多说吧）？简直无力吐槽：
-```
-//fragment的
-int fragPosition = BaseFragmentPagerAdapter对象.getRootViewPosition(View rootView);
-//普通adapter的
-int adapterPosition = BaseAdapterLvs子类.getRootViewPosition(View rootView);
-```
 
-### 基于list的简单多条目
+### 更精简的条目写法
+
+只有2个方法：addMultipleItem、addDefaultMultipleItem
+addMultipleItem的isThisTypeCallback返回一个布尔值表示是否是当前条目，不需要额外其他逻辑
+
 ```
-BaseAdapterRvMultipleList<TestBean> adapter = new BaseAdapterRvMultipleList<>();
-//添加条目1
-adapter.addMultipleItem(R.layout.adapter_main_multiple_0, new BaseAdapterRvMultipleList.OnMultipleListListener<AdapterMainMultiple0Binding, TestBean>() {
-    @Override
-    public boolean isThisType(@NonNull BaseAdapterRvMultipleList<TestBean> adapter, int listPosition, @NonNull TestBean bean) {
-        return listPosition % 2 == 0;//true表示这条数据是这个条目的
+    private val multiAdapter by lazyNone {
+        createMultiAdapter<TestBean>().apply {
+            addMultipleItem<AdapterMainMultiple0Binding>(isThisTypeCallback = { listPosition, _ -> listPosition % 3 == 0 }) { holder, vb, bean ->
+                vb.tvText.setTextColor(0xff00ff00.toInt())
+                vb.tvText.text = "多条目0：${bean.text}"
+                holder.setOnFastClickListener {
+                    toast("点击item了${holder.listPosition}")
+                }
+            }
+            addMultipleItem<AdapterMainMultiple1Binding>(isThisTypeCallback = { listPosition, _ -> listPosition % 3 == 1 }) { holder, vb, bean ->
+                vb.tvText2.text = "多条目1：${bean.text}"
+            }
+            addDefaultMultipleItem<AdapterMainMultipleDefBinding>()
+
+            headerView = AppCompatTextView(this@MainActivity).apply { text = "这是header" }
+            footerView = AppCompatTextView(this@MainActivity).apply { text = "这是footer" }
+        }
     }
-
-    @Override
-    public void onBindListViewHolder(@NonNull BaseAdapterRvMultipleList<TestBean> adapter, @NonNull BaseViewHolder<AdapterMainMultiple0Binding> holder, int listPosition, @NonNull TestBean bean) {
-        holder.getBinding().tvHhh.setTextColor(0xff00ff00);
-    }
-    //当然还有onCreateListViewHolder没写
-})
-//添加条目2，不需要bind直接使用语法糖
-.addMultipleItem(R.layout.adapter_main_multiple_1, (adapter1, listPosition, bean) -> listPosition % 2 != 0);
-
-adapter.setListAndNotifyDataSetChanged(list);
 ```
+
+### 嵌套？直接正常写就行了
+
+注意嵌套效率问题，不在当前讨论范围内
+
+```
+    private val nesAdapter by lazyNone {
+        createListVbAdapter<AdapterMainNesBinding, TestBean> { holder, vb, bean ->
+            vb.tvNesText.text = "这是嵌套外层：${bean.text},${holder.listPosition},${holder.adapterLayoutPosition}"
+            val itemAdapter = vb.rvItemList.getAdapterOrCreate {
+                createListVbAdapter<AdapterMainNesItemBinding, String> { holder, vb, bean ->
+                    vb.tvItem.text = "这是内层$bean,${holder.listPosition},${holder.adapterLayoutPosition}"
+                }.apply {
+                    headerView = AppCompatTextView(this@MainActivity).apply {
+                        text = "这是内层header"
+                        setOnFastClickListener {
+                            toast("你点击了内层header")
+                        }
+                    }
+                    footerView = AppCompatTextView(this@MainActivity).apply { text = "这是内层footer" }
+                    vb.rvItemList.setGridLayoutManagerSpanSizeLookup {
+                        when (it) {
+                            0, (itemCount - 1) -> 2
+                            else -> 1
+                        }
+                    }
+                }
+            }
+            itemAdapter.notifyDataSetChanged(bean.itemTextList)
+        }.apply {
+            headerView = AppCompatTextView(this@MainActivity).apply {
+                text = "这是外层header"
+                setTextColor(0xff00ff00.toInt())
+            }
+        }
+    }
+```
+
 **多条目太复杂，无法满足？**
 
 当然还有适用于各种复杂样式的adapter容器（如：聊天列表，首页、今日头条的列表等）：
@@ -214,15 +138,17 @@ adapter.setListAndNotifyDataSetChanged(list);
 本项目已默认导入，直接使用即可： [一个通过add其他adapter的超级容器，无论多么复杂的列表样式均可解耦成一个一个的adapter](https://github.com/weimingjue/BaseContainerAdapter)
 
 简单示例（具体请看详情介绍）：
+
 ```
-mRv.setLayoutManager(new LinearLayoutManager(this));//如果是GridLayoutManager需要提前设置好，Linear随意
-BaseContainerAdapter baseAdapter = new BaseContainerAdapter();
-mRv.setAdapter(baseAdapter.addAdapter(new TextAdapter(),new ImageAdapter()));
+mRv.setLayoutManager(LinearLayoutManager(this))//如果是GridLayoutManager需要提前设置好，Linear随意
+val baseAdapter = createContainerAdapter()
+mRv.setAdapter(baseAdapter.addAdapter(TextAdapter(),ImageAdapter()))
 //...
-baseAdapter.setListAndNotifyDataSetChanged(list);
+baseAdapter.setListAndNotifyDataSetChanged(list)
 ```
 
 ### ViewPager、RecyclerView、ViewPager2高度自适应第一个child
+
 ```
 <androidx.viewpager2.widget.ViewPager2
     android:id="@+id/vp_pager"
@@ -234,16 +160,19 @@ ViewGroupWrapUtils.wrap(vp, false);
 ```
 
 ## 使用小贴士
+
 本项目所有的adapter都会内部维护一个List，所以修改数据请一定要使用adapter.getList()，然后notify...
 
-有header、footer调用notifyItem...时请注意+1（Adapter的通病，无解决方案）
+刷新list数据建议调用notifyListItem...方法，这样就不用处理header、footer数量了
 
 关于增加多个header、footer：个人认为多个header、footer场景少并且双方都难以管理，所以用到时请自己写个LinearLayout
 
 关于空状态：个人认为这不在adapter范畴（对上拉下拉、notifyItem都不太友好），自行写个空状态工具类反而更方便（很简单，如有需要后续开放）
 
 ## 导入方式
+
 你的build.gradle要有jitpack.io，大致如下
+
 ```
 allprojects {
     repositories {
@@ -254,9 +183,9 @@ allprojects {
     }
 }
 ```
+
 然后：
 `（api或）implementation 'com.github.weimingjue:BaseAdapter:4.3.0'`
 
 混淆要求：
-加 -keep class * extends androidx.databinding.ViewBinding 可能会快一点
-不加也没啥影响
+请保留ViewBinding里的两个inflate方法，不然会反射不到

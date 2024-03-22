@@ -1,23 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/tvText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
+        android:text="兜底多条目类型，一般用于防止服务端增加未知类型导致崩溃"
         android:textColor="#333"
         android:textSize="20sp"
-        android:textStyle="bold"
-        tools:text="这是文本" />
-
-    <Button
-        android:id="@+id/btButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="按钮" />
+        android:textStyle="bold" />
 </LinearLayout>

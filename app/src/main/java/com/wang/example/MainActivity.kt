@@ -1,227 +1,144 @@
-package com.wang.example;
+package com.wang.example
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.widget.Toast;
+import android.os.Bundle
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatTextView
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.wang.adapters.adapter.BaseAdapter
+import com.wang.adapters.utils.adapterLayoutPosition
+import com.wang.adapters.utils.createListVbAdapter
+import com.wang.adapters.utils.createMultiAdapter
+import com.wang.adapters.utils.getAdapterOrCreate
+import com.wang.adapters.utils.listPosition
+import com.wang.adapters.utils.setGridLayoutManagerSpanSizeLookup
+import com.wang.adapters.utils.setOnFastClickListener
+import com.wang.example.databinding.ActivityMainBinding
+import com.wang.example.databinding.AdapterMainListBinding
+import com.wang.example.databinding.AdapterMainMultiple0Binding
+import com.wang.example.databinding.AdapterMainMultiple1Binding
+import com.wang.example.databinding.AdapterMainMultipleDefBinding
+import com.wang.example.databinding.AdapterMainNesBinding
+import com.wang.example.databinding.AdapterMainNesItemBinding
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class MainActivity extends AppCompatActivity {
-
-    private RecyclerView mRv;
-
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        findViewById(R.id.tv_main_vp).setOnClickListener(v -> startActivity(ViewPagerFragActivity.class));
-        mRv = findViewById(R.id.rv_main);
-        listTest();
-    }
+class MainActivity : AppCompatActivity() {
 
     /**
-     * 简单的列表测试
+     * 无锁不支持并发的，适用于单线程
      */
-    private void listTest() {
-        mRv.setLayoutManager(new LinearLayoutManager(this));
-        final ArrayList<TestBean> list = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            TestBean tb = new TestBean();
-            tb.text = "第" + i;
-            if (i % 5 == 0) {
-                tb.itemTextList = new ArrayList<>();
-                for (int j = 0; j < 10; j++) {
-                    tb.itemTextList.add("第" + i + "，子" + j);
+    @Suppress("NOTHING_TO_INLINE")
+    inline fun <T> lazyNone(noinline initializer: () -> T): Lazy<T> = lazy(LazyThreadSafetyMode.NONE, initializer)
+
+    private val listAdapter by lazyNone {
+        createListVbAdapter<AdapterMainListBinding, String> { holder, vb, bean ->
+            if (bean.contains("10")) {
+                holder.itemView.setBackgroundColor(0xff999999.toInt())
+            }
+            vb.tvText.text = bean
+            vb.btButton.setOnFastClickListener {
+                toast("点击了Button")
+            }
+            holder.setOnFastClickListener {
+                toast("点击item了${holder.listPosition}")
+            }
+        }.apply {
+            headerView = AppCompatTextView(this@MainActivity).apply {
+                text = "这是header"
+            }
+        }
+    }
+
+    private val multiAdapter by lazyNone {
+        createMultiAdapter<TestBean>().apply {
+            addMultipleItem<AdapterMainMultiple0Binding>(isThisTypeCallback = { listPosition, _ -> listPosition % 3 == 0 }) { holder, vb, bean ->
+                vb.tvText.setTextColor(0xff00ff00.toInt())
+                vb.tvText.text = "多条目0：${bean.text}"
+                holder.setOnFastClickListener {
+                    toast("点击item了${holder.listPosition}")
                 }
             }
-            list.add(tb);
+            addMultipleItem<AdapterMainMultiple1Binding>(isThisTypeCallback = { listPosition, _ -> listPosition % 3 == 1 }) { holder, vb, bean ->
+                vb.tvText2.text = "多条目1：${bean.text}"
+            }
+            addDefaultMultipleItem<AdapterMainMultipleDefBinding>()
+
+            headerView = AppCompatTextView(this@MainActivity).apply { text = "这是header" }
+            footerView = AppCompatTextView(this@MainActivity).apply { text = "这是footer" }
         }
-        //直接create，逻辑较少推荐使用
-//        BaseAdapterList<?, String> adapter = BaseAdapterList.createAdapter(R.layout.adapter_main_list);
-//        BaseAdapterList<AdapterMainListBinding, String> adapter = BaseAdapterList.createAdapter(null, R.layout.adapter_main_list,
-//                (adapter1, holder, listPosition, s) -> {
-//                    if (s.contains("10")) {
-//                        holder.itemView.setBackgroundColor(0xff999999);
-//                    }
-//                });
-        //自定义方案
-//        ListAdapter adapter = new ListAdapter();
-        //多条目
-//        BaseAdapterMultipleList<TestBean> adapter = new BaseAdapterMultipleList<>();
-//        adapter.addMultipleItem(R.layout.adapter_main_multiple_0, new BaseAdapterMultipleList.OnMultipleListListener<AdapterMainMultiple0Binding, TestBean>() {
-//            @Override
-//            public boolean isThisType(@NonNull BaseAdapterMultipleList<TestBean> adapter, int listPosition, @NonNull TestBean bean) {
-//                return listPosition % 2 == 0;
-//            }
-//
-//            @Override
-//            public void onBindListViewHolder(@NonNull BaseAdapterMultipleList<TestBean> adapter, @NonNull BaseViewHolder<AdapterMainMultiple0Binding> holder, int listPosition, @NonNull TestBean bean) {
-//                holder.getBinding().tvHhh.setTextColor(0xff00ff00);
-//            }
-//        }).addMultipleItem(R.layout.adapter_main_multiple_1, (adapter1, listPosition, bean) -> listPosition % 2 != 0);
-
-//        adapter.setListAndNotifyDataSetChanged(list);
-//        mRv.setAdapter(adapter);
-        //设置点击事件
-//        adapter.setOnItemClickListener(new OnItemItemClickListener() {
-//            @Override
-//            public void onParentItemClick(@NonNull View view, int parentPosition) {
-//                switch (view.getId()) {
-//                    case R.id.bt_button:
-//                        toast("没想到吧，还能这样玩：" + parentPosition);
-//                        break;
-//                    default:
-//                        toast("你点击了外层：" + parentPosition);
-//                        break;
-//                }
-//            }
-//
-//            @Override
-//            public void onChildItemClick(@NonNull View view, int parentPosition, int childPosition) {
-//                toast("你点击了外层：" + parentPosition + "，内层：" + childPosition);
-//            }
-//
-//            @Override
-//            public boolean onParentItemLongClick(@NonNull View view, int parentPosition) {
-//                switch (view.getId()) {
-//                    case R.id.bt_button:
-//                        toast("长按没想到吧，还能这样玩：" + parentPosition);
-//                        break;
-//                    default:
-//                        toast("你长按了外层：" + parentPosition);
-//                        break;
-//                }
-//                return true;
-//            }
-//
-//            @Override
-//            public boolean onChildItemLongClick(@NonNull View view, int parentPosition, int childPosition) {
-//                toast("你长按了外层：" + parentPosition + "，内层：" + childPosition);
-//                return true;
-//            }
-//
-//            @Override
-//            public void onParentHeaderClick(@NonNull View view) {
-//                toast("你点击了外层：header");
-//            }
-//
-//            @Override
-//            public void onChildHeaderClick(@NonNull View view, int parentPosition) {
-//                toast("你点击了外层：" + parentPosition + "，内层：header");
-//            }
-//
-//            @Override
-//            public boolean onParentHeaderLongClick(@NonNull View view) {
-//                toast("你长按了外层：header");
-//                return true;
-//            }
-//
-//            @Override
-//            public boolean onChildHeaderLongClick(@NonNull View view, int parentPosition) {
-//                toast("你长按了外层：" + parentPosition + "，内层：header");
-//                return true;
-//            }
-//
-//            @Override
-//            public void onParentFooterClick(@NonNull View view) {
-//                toast("你点击了外层：footer");
-//            }
-//
-//            @Override
-//            public void onChildFooterClick(@NonNull View view, int parentPosition) {
-//                toast("你点击了外层：" + parentPosition + "，内层：footer");
-//            }
-//
-//            @Override
-//            public boolean onParentFooterLongClick(@NonNull View view) {
-//                toast("你长按了外层：footer");
-//                return true;
-//            }
-//
-//            @Override
-//            public boolean onChildFooterLongClick(@NonNull View view, int parentPosition) {
-//                toast("你长按了外层：" + parentPosition + "，内层：footer");
-//                return true;
-//            }
-//        });
-        //添加头
-//        adapter.setHeaderView(this, R.layout.adapter_main_header);
-//        //添加尾
-//        AppCompatImageView iv = new AppCompatImageView(this);
-//        iv.setImageResource(R.mipmap.ic_launcher);
-//        iv.setAdjustViewBounds(true);
-//        adapter.setFooterView(iv);
     }
 
-//    public static class ListAdapter extends BaseAdapterList<AdapterMainListBinding, TestBean> {
-//
-//        @Override
-//        public void onBindListViewHolder(@NonNull BaseViewHolder<AdapterMainListBinding> holder, int listPosition, TestBean bean) {
-//            setItemRvData(holder.getBinding().rvItemList, holder, bean.itemTextList);
-//            MyAdapter adapter = (MyAdapter) holder.getBinding().rvItemList.getAdapter();
-//            if (bean.itemTextList != null && bean.itemTextList.size() > 0) {
-//                TextView footerTv = new TextView(holder.getContext());
-//                footerTv.setText("内层的footer，外层position" + listPosition);
-//                footerTv.setTextColor(0xff999999);
-//                footerTv.setTextSize(13);
-//                adapter.setFooterView(footerTv);
-//            } else {
-//                adapter.setFooterView(null);
-//            }
-//        }
-//
-//        @NonNull
-//        @Override
-//        public BaseViewHolder<AdapterMainListBinding> onCreateListViewHolder(@NonNull ViewGroup parent) {
-//            BaseViewHolder<AdapterMainListBinding> holder = super.onCreateListViewHolder(parent);
-//            holder.getBinding().rvItemList.setLayoutManager(new GridLayoutManager(parent.getContext(), 2));
-//            MyAdapter adapter = new MyAdapter();
-//            TextView headerTv = new TextView(parent.getContext());
-//            headerTv.setText("内层的header一直有");
-//            headerTv.setTextColor(0xff999999);
-//            headerTv.setTextSize(13);
-//            adapter.setHeaderView(headerTv);
-//            holder.getBinding().rvItemList.setAdapter(adapter);
-//            holder.getBinding().rvItemList.setNestedScrollingEnabled(false);
-//            return holder;
-//        }
-//
-//        private static class MyAdapter extends BaseAdapterList<ViewBinding, String> {
-//
-//            @Override
-//            public void onBindListViewHolder(@NonNull BaseViewHolder<ViewBinding> holder, int listPosition, String bean) {
-//                TextView tv = (TextView) holder.itemView;
-//                tv.setText(bean);
-//            }
-//
-//            @NonNull
-//            @Override
-//            public BaseViewHolder<ViewBinding> onCreateListViewHolder(@NonNull ViewGroup parent) {
-//                TextView tv = new AppCompatTextView(parent.getContext());
-//                tv.setTextColor(0xffff00ff);
-//                tv.setTextSize(15);
-//                tv.setPadding(50, 10, 50, 10);
-//                return new BaseViewHolder<>(tv);
-//            }
-//        }
-//    }
-
-    public static class TestBean {
-        public String text;
-        public List<String> itemTextList;
+    private val nesAdapter by lazyNone {
+        createListVbAdapter<AdapterMainNesBinding, TestBean> { holder, vb, bean ->
+            vb.tvNesText.text = "这是嵌套外层：${bean.text},${holder.listPosition},${holder.adapterLayoutPosition}"
+            val itemAdapter = vb.rvItemList.getAdapterOrCreate {
+                createListVbAdapter<AdapterMainNesItemBinding, String> { holder, vb, bean ->
+                    vb.tvItem.text = "这是内层$bean,${holder.listPosition},${holder.adapterLayoutPosition}"
+                }.apply {
+                    headerView = AppCompatTextView(this@MainActivity).apply {
+                        text = "这是内层header"
+                        setOnFastClickListener {
+                            toast("你点击了内层header")
+                        }
+                    }
+                    footerView = AppCompatTextView(this@MainActivity).apply { text = "这是内层footer" }
+                    vb.rvItemList.setGridLayoutManagerSpanSizeLookup {
+                        when (it) {
+                            0, (itemCount - 1) -> 2
+                            else -> 1
+                        }
+                    }
+                }
+            }
+            itemAdapter.notifyDataSetChanged(bean.itemTextList)
+        }.apply {
+            headerView = AppCompatTextView(this@MainActivity).apply {
+                text = "这是外层header"
+                setTextColor(0xff00ff00.toInt())
+            }
+        }
     }
 
-    public void startActivity(Class c) {
-        startActivity(new Intent(this, c));
+    private var currentAdapter = 0
+    private val adapters: Array<BaseAdapter> by lazyNone { arrayOf(listAdapter, multiAdapter, nesAdapter) }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val vb = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(vb.root)
+
+        vb.tvChange.setOnFastClickListener {
+            currentAdapter = (currentAdapter + 1) % adapters.size
+            changeAdapter(vb)
+        }
+
+        vb.rvMain.layoutManager = LinearLayoutManager(this)
+        val list = ArrayList<TestBean>()
+        for (i in 0..99) {
+            val tb = TestBean("第$i")
+            if (i % 5 == 0) {
+                for (j in 0..9) {
+                    tb.itemTextList.add("第$i，子$j")
+                }
+            }
+            list.add(tb)
+        }
+        listAdapter.notifyDataSetChanged(list.map { it.text })
+        multiAdapter.notifyDataSetChanged(list)
+        nesAdapter.notifyDataSetChanged(list)
+
+        changeAdapter(vb)
     }
 
-    public void toast(String st) {
-        Toast.makeText(this, st, Toast.LENGTH_SHORT).show();
+    private fun changeAdapter(vb: ActivityMainBinding) {
+        vb.rvMain.adapter = adapters[currentAdapter]
+    }
+
+    class TestBean(
+        val text: String,
+        val itemTextList: ArrayList<String> = arrayListOf()
+    )
+
+    fun toast(st: String) {
+        Toast.makeText(this, st, Toast.LENGTH_SHORT).show()
     }
 }

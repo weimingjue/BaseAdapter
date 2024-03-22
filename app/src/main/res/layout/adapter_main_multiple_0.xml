@@ -7,11 +7,10 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/tv_hhh"
+        android:id="@+id/tvText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:text="@{`这是type0的文本：`+bean.text}"
         android:textColor="#333"
         android:textSize="20sp"
         android:textStyle="bold"

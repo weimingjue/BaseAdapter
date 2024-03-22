@@ -2,91 +2,22 @@ package com.wang.adapters.adapter
 
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.LayoutRes
 import androidx.viewbinding.ViewBinding
-import com.sea.base.adapter.BaseViewHolder
 import com.wang.adapters.helper.ListAdapterHelper
-import com.wang.adapters.helper.ListAdapterHelper.AdapterListType
-import com.wang.adapters.interfaces.OnItemClickListener
-import com.wang.container.interfaces.IListAdapter
+import com.wang.adapters.holder.BaseViewHolder
+import com.wang.adapters.interfaces.IHeaderFooterListAdapter
+import com.wang.adapters.utils.listPosition
 
 /**
  * RecyclerView listAdapter的基类
  * 可以加header、footer,如果是Grid需要自行处理setSpanSizeLookup头尾的跨度
- * [.notifyItemChanged]相关方法时注意有header时需要+1
+ * [notifyItemChanged]相关方法时注意有header时需要+1，建议使用[notifyListItemChanged]等相关方法
  *
- *
- * 多条目见[BaseAdapterMultipleList]
+ * 见[BaseAdapter.create]等方法
  */
-abstract class BaseListAdapter<DB : ViewBinding, BEAN>(
-    @LayoutRes layoutId: Int,
-    list: List<BEAN>? = null
-) : BaseAdapter(), IListAdapter<BEAN, DB, OnItemClickListener> {
-    private val listHelper: ListAdapterHelper<DB, BEAN> = ListAdapterHelper(this, layoutId, list)
+abstract class BaseListAdapter<VB : ViewBinding, BEAN : Any>(list: List<BEAN>? = null) : BaseAdapter(), IHeaderFooterListAdapter<BEAN> {
 
-    /**
-     * 资源id已经不是必须的了
-     *
-     *
-     * 无资源id有2种解决方式（任选其一）：
-     * 1.什么都不做，根据泛型自动获取，但Proguard不能混淆[ViewBinding]的子类
-     * 2.覆盖[.onCreateListViewHolder]，自己自定义即可
-     */
-    @JvmOverloads
-    constructor(list: List<BEAN>? = null) : this(0, list) {
-    }
-
-    override fun getItemCount(): Int {
-        return headerViewCount + footerViewCount + listSize()
-    }
-
-    override fun onCreateViewHolder2(
-        parent: ViewGroup,
-        @AdapterListType viewType: Int
-    ): BaseViewHolder<*> {
-        return listHelper.onCreateViewHolder(parent, viewType)
-    }
-
-    override fun onBindViewHolder2(holder: BaseViewHolder<*>, position: Int) {
-        listHelper.onBindViewHolder(holder, position)
-    }
-
-    @AdapterListType
-    override fun getItemViewType(position: Int): Int {
-        return listHelper.getItemViewType(position)
-    }
-    ///////////////////////////////////////////////////////////////////////////
-    // 以下是增加的方法
-    ///////////////////////////////////////////////////////////////////////////
-    /**
-     * 最终你的list的create
-     *
-     *
-     * 默认用DataBinding create
-     * 完全不需要的话覆盖整个方法就行了，不会出问题
-     * 你也可以重写来添加自己的默认逻辑，如：全局隐藏显示、嵌套rv的默认属性设置等
-     */
-    override fun onCreateListViewHolder(parent: ViewGroup): BaseViewHolder<DB> {
-        return listHelper.onCreateDefaultViewHolder(parent, this)
-    }
-
-    interface OnAdapterBindListener<DB : ViewBinding, BEANS> {
-        /**
-         * 当viewHolder创建完成后
-         */
-        fun onViewHolderCreated(
-            adapter: BaseListAdapter<DB, BEANS>?,
-            holder: BaseViewHolder<DB>?
-        ) {
-        }
-
-        fun onBindViewHolder(
-            adapter: BaseListAdapter<DB, BEANS>?,
-            holder: BaseViewHolder<DB>?,
-            listPosition: Int,
-            bean: BEANS
-        )
-    }
+    private val listHelper = ListAdapterHelper(this, list)
 
     override val list get() = listHelper.list
 
@@ -101,37 +32,51 @@ abstract class BaseListAdapter<DB : ViewBinding, BEAN>(
             listHelper.footerView = value
         }
 
-    companion object {
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // 追加一个懒汉写法
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    override fun getItemCount() = headerViewCount + footerViewCount + listSize()
 
-        /**
-         * list+资源id+回调
-         *
-         * @param layoutId 资源id，必须有
-         */
-        fun <DB : ViewBinding, BEAN> createAdapter(
-            @LayoutRes layoutId: Int,
-            list: List<BEAN>? = null,
-            listener: OnAdapterBindListener<DB, BEAN>? = null
-        ): BaseListAdapter<DB, BEAN> {
-            return object : BaseListAdapter<DB, BEAN>(layoutId, list) {
-                override fun onCreateListViewHolder(parent: ViewGroup): BaseViewHolder<DB> {
-                    val holder = super.onCreateListViewHolder(parent)
-                    listener?.onViewHolderCreated(this, holder)
-                    return holder
-                }
+    @ListAdapterHelper.AdapterListType
+    override fun getItemViewType(position: Int) = listHelper.getItemViewType(position)
 
-                override fun onBindListViewHolder(
-                    holder: BaseViewHolder<DB>,
-                    listPosition: Int,
-                    bean: BEAN
-                ) {
-                    listener?.onBindViewHolder(this, holder, listPosition, bean)
-                }
+    override fun onCreateViewHolder(parent: ViewGroup, @ListAdapterHelper.AdapterListType viewType: Int) =
+        when (viewType) {
+            ListAdapterHelper.TYPE_HEADER, ListAdapterHelper.TYPE_FOOTER -> listHelper.onCreateHeaderFooterViewHolder(parent)
+            //TYPE_BODY
+            else -> onCreateListViewHolder(parent)
+        }
+
+    override fun onBindViewHolder(holder: BaseViewHolder<*>, position: Int) {
+        when (getItemViewType(position)) {
+            ListAdapterHelper.TYPE_HEADER -> {
+                listHelper.onBindHeaderFooterViewHolder(holder, headerView!!)
+            }
+
+            ListAdapterHelper.TYPE_FOOTER -> {
+                listHelper.onBindHeaderFooterViewHolder(holder, footerView!!)
+            }
+
+            else -> {//TYPE_BODY
+                onBindListViewHolder(
+                    holder as BaseViewHolder<VB>,
+                    list[holder.listPosition]
+                )
             }
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // 以下是增加的方法
+    ///////////////////////////////////////////////////////////////////////////
+    /**
+     * 最终你的list的create
+     *
+     * 默认用DataBinding create
+     * 完全不需要的话覆盖整个方法就行了，不会出问题
+     * 你也可以重写来添加自己的默认逻辑，如：全局隐藏显示、嵌套rv的默认属性设置等
+     */
+    open fun onCreateListViewHolder(parent: ViewGroup) = listHelper.onCreateDefaultViewHolder<VB>(parent, this)
+
+    /**
+     * 最终你的list的bind
+     */
+    abstract fun onBindListViewHolder(holder: BaseViewHolder<VB>, bean: BEAN)
 }
