@@ -16,13 +16,14 @@ Adapter属于View层，Activity也是View层，在当前各种新框架下两个
 
 ```
 class MainActivity : AppCompatActivity() {
+    //lazyNone就是lazy(LazyThreadSafetyMode.NONE, initializer)的拓展
     private val listAdapter by lazyNone {
         createListVbAdapter<AdapterMainListBinding, String> { holder, vb, bean -> }
     }
 }
 ```
 
-点击事件什么的都不需要额外操作，没有回调也没有额外传参，直接在Adapter写就行了
+点击事件什么的都不需要额外操作，没有回调也不需要额外传参，直接在Adapter写就行了
 
 ```
 class MainActivity : AppCompatActivity() {
